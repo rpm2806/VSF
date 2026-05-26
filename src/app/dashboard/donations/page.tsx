@@ -5,6 +5,7 @@ import { AddDonationDialog } from "@/components/AddDonationDialog"
 import StudentDonationDialog from "@/components/StudentDonationDialog"
 import VerificationQueue from "@/components/VerificationQueue"
 import DonationPaymentProofViewer from "@/components/DonationPaymentProofViewer"
+import DeleteDonationButton from "@/components/DeleteDonationButton"
 import {
   Table,
   TableBody,
@@ -52,6 +53,7 @@ export default async function DonationsPage() {
     : donations.filter(d => d.status !== "PENDING")
 
   const isAdminOrVolunteer = role === "MASTER_ADMIN" || role === "VOLUNTEER"
+  const isMasterAdmin = role === "MASTER_ADMIN"
 
   function getStatusBadge(status: string) {
     if (status === "PAID") return { variant: "default" as const, className: "bg-emerald-500 hover:bg-emerald-600" }
@@ -170,6 +172,10 @@ export default async function DonationsPage() {
                           </>
                         )}
                       </div>
+                      {/* Master Admin delete button */}
+                      {isMasterAdmin && (
+                        <DeleteDonationButton id={donation.id} amount={donation.amount} />
+                      )}
                     </TableCell>
                   </TableRow>
                 )

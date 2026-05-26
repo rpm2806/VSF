@@ -257,3 +257,36 @@ export async function PATCH(req: Request) {
     return new NextResponse("Internal Error", { status: 500 })
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await auth()
+    if (!session?.user) return new NextResponse("Unauthorized", { status: 401 })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (session.user as any).role
+    if (userRole !== "MASTER_ADMIN") {
+      return new NextResponse("Only Master Admin can delete payments", { status: 403 })
+    }
+
+    const { id } = await req.json()
+    if (!id) return new NextResponse("Missing donation ID", { status: 400 })
+
+    // Delete receipt first (FK constraint)
+    await db.receipt.deleteMany({ where: { donationId: id } })
+    const donation = await db.donation.delete({ where: { id } })
+
+    await logActivity({
+      userId: session.user.id,
+      action: "DONATION_DELETED",
+      entityType: "DONATION",
+      entityId: id,
+      details: `Deleted Rs.${donation.amount} donation record (was ${donation.status})`
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("[DONATIONS_DELETE]", error)
+    return new NextResponse("Internal Error", { status: 500 })
+  }
+}
