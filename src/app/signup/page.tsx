@@ -72,33 +72,33 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3fbf6] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(#d1fae5_2px,transparent_2px)] bg-[size:32px_32px] opacity-40" />
 
       <div className="max-w-4xl mx-auto relative z-10">
-        <Link href="/login" className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-900 transition-colors bg-white/80 px-4 py-2 rounded-full backdrop-blur-sm shadow-sm mb-8">
+        <Link href="/login" className="inline-flex items-center text-sm font-medium text-emerald-700 hover:text-primary transition-colors bg-white/80 px-4 py-2 rounded-full backdrop-blur-sm shadow-sm mb-8">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Login
         </Link>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-emerald-100/50">
-          <div className="bg-emerald-700 px-8 py-10 text-white text-center">
+        <div className="bg-card text-card-foreground rounded-3xl shadow-xl overflow-hidden border border-border">
+          <div className="bg-primary px-8 py-10 text-primary-foreground text-center">
             <h1 className="text-3xl font-bold mb-2">Vriksh Students Federation</h1>
-            <p className="text-emerald-100 text-lg">New Member Registration</p>
+            <p className="text-primary-foreground/80 text-lg">New Member Registration</p>
           </div>
 
           <form onSubmit={onSubmit} className="p-8 md:p-12 space-y-8">
             {/* Identity Role */}
             <div className="space-y-4 pb-8 border-b">
-              <h2 className="text-xl font-bold text-emerald-950">1. Basic Identity</h2>
+              <h2 className="text-xl font-bold text-primary font-bold">1. Basic Identity</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="role">Registering as</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="role">Registering as</Label>
                   <Select 
                     value={formData.role} 
                     onValueChange={(val) => setFormData({...formData, role: val || "STUDENT"})}
                   >
-                    <SelectTrigger className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium">
+                    <SelectTrigger className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -108,13 +108,13 @@ export default function SignupPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="fullName">Full Name *</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="fullName">Full Name *</Label>
                   <Input 
                     id="fullName" 
                     required 
                     value={formData.fullName}
                     onChange={e => setFormData({...formData, fullName: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
               </div>
@@ -122,10 +122,10 @@ export default function SignupPage() {
 
             {/* Contact Details */}
             <div className="space-y-4 pb-8 border-b">
-              <h2 className="text-xl font-bold text-emerald-950">2. Contact Details</h2>
+              <h2 className="text-xl font-bold text-primary font-bold">2. Contact Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="mobileNumber">Mobile Number *</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="mobileNumber">Mobile Number *</Label>
                   <Input 
                     id="mobileNumber" 
                     required 
@@ -133,35 +133,35 @@ export default function SignupPage() {
                     placeholder="10-digit number"
                     value={formData.mobileNumber}
                     onChange={e => setFormData({...formData, mobileNumber: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="email">Email Address</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="email">Email Address</Label>
                   <Input 
                     id="email" 
                     type="email"
                     value={formData.email}
                     onChange={e => setFormData({...formData, email: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 col-span-1 md:col-span-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="currentAddress">Current Address</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="currentAddress">Current Address</Label>
                   <Input 
                     id="currentAddress" 
                     value={formData.currentAddress}
                     onChange={e => setFormData({...formData, currentAddress: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 col-span-1 md:col-span-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="permanentAddress">Permanent Address</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="permanentAddress">Permanent Address</Label>
                   <Input 
                     id="permanentAddress" 
                     value={formData.permanentAddress}
                     onChange={e => setFormData({...formData, permanentAddress: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
               </div>
@@ -169,30 +169,30 @@ export default function SignupPage() {
 
             {/* Academic & Personal */}
             <div className="space-y-4 pb-8 border-b">
-              <h2 className="text-xl font-bold text-emerald-950">3. Academic & Personal Info</h2>
+              <h2 className="text-xl font-bold text-primary font-bold">3. Academic & Personal Info</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="dob">Date of Birth</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="dob">Date of Birth</Label>
                   <Input 
                     id="dob" 
                     type="date"
                     value={formData.dob}
                     onChange={e => setFormData({...formData, dob: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="bloodGroup">Blood Group</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="bloodGroup">Blood Group</Label>
                   <Input 
                     id="bloodGroup" 
                     placeholder="e.g. O+"
                     value={formData.bloodGroup}
                     onChange={e => setFormData({...formData, bloodGroup: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="aadhaarNumber">Aadhaar Number *</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="aadhaarNumber">Aadhaar Number *</Label>
                   <Input 
                     id="aadhaarNumber"
                     required 
@@ -200,65 +200,65 @@ export default function SignupPage() {
                     placeholder="12-digit Aadhaar"
                     value={formData.aadhaarNumber}
                     onChange={e => setFormData({...formData, aadhaarNumber: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="joiningYear">Joining year at Vriksh *</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="joiningYear">Joining year at Vriksh *</Label>
                   <Input 
                     id="joiningYear" 
                     type="number" 
                     required 
                     value={formData.joiningYear}
                     onChange={e => setFormData({...formData, joiningYear: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="class">Class / Year / Other</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="class">Class / Year / Other</Label>
                   <Input 
                     id="class" 
                     value={formData.class}
                     onChange={e => setFormData({...formData, class: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-1">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="lastSchool">Last School</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="lastSchool">Last School</Label>
                   <Input 
                     id="lastSchool" 
                     value={formData.lastSchool}
                     onChange={e => setFormData({...formData, lastSchool: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="specialization">Specialization / Stream</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="specialization">Specialization / Stream</Label>
                   <Input 
                     id="specialization" 
                     value={formData.specialization}
                     onChange={e => setFormData({...formData, specialization: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
 
                 {formData.role === "ALUMNI" && (
                   <div className="space-y-2 col-span-1 md:col-span-3">
-                    <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="workingAt">Currently Working At / Studying At</Label>
+                    <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="workingAt">Currently Working At / Studying At</Label>
                     <Input 
                       id="workingAt" 
                       value={formData.workingAt}
                       onChange={e => setFormData({...formData, workingAt: e.target.value})}
-                      className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                      className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                     />
                   </div>
                 )}
                 
                 <div className="space-y-2 col-span-1 md:col-span-3">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="bio">Bio</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="bio">Bio</Label>
                   <textarea 
                     id="bio"
-                    className="flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 text-gray-900 font-medium"
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary text-foreground font-medium"
                     value={formData.bio}
                     onChange={e => setFormData({...formData, bio: e.target.value})}
                     placeholder="Tell us a little bit about yourself..."
@@ -269,33 +269,33 @@ export default function SignupPage() {
 
             {/* Family Information */}
             <div className="space-y-4 pb-8 border-b">
-              <h2 className="text-xl font-bold text-emerald-950">4. Family Information</h2>
+              <h2 className="text-xl font-bold text-primary font-bold">4. Family Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="fatherName">Father&apos;s Name</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="fatherName">Father&apos;s Name</Label>
                   <Input 
                     id="fatherName" 
                     value={formData.fatherName}
                     onChange={e => setFormData({...formData, fatherName: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="motherName">Mother&apos;s Name</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="motherName">Mother&apos;s Name</Label>
                   <Input 
                     id="motherName" 
                     value={formData.motherName}
                     onChange={e => setFormData({...formData, motherName: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="parentContact">Parent&apos;s Contact Number</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="parentContact">Parent&apos;s Contact Number</Label>
                   <Input 
                     id="parentContact" 
                     value={formData.parentContact}
                     onChange={e => setFormData({...formData, parentContact: e.target.value})}
-                    className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 placeholder:text-gray-400 font-medium"
+                    className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
               </div>
@@ -303,11 +303,11 @@ export default function SignupPage() {
 
             {/* File Uploads */}
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-emerald-950">5. Verification Documents</h2>
+              <h2 className="text-xl font-bold text-primary font-bold">5. Verification Documents</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="profileImage">Profile Photo</Label>
-                  <div className="border-2 border-dashed border-emerald-300 rounded-xl p-6 text-center bg-emerald-50/30 hover:bg-emerald-50/70 transition-colors border-2 cursor-pointer relative">
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="profileImage">Profile Photo</Label>
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative">
                     <input 
                       type="file" 
                       id="profileImage"
@@ -319,7 +319,7 @@ export default function SignupPage() {
                         }
                       }}
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2 text-emerald-900">
+                    <div className="flex flex-col items-center justify-center space-y-2 text-primary">
                       {profileImage ? (
                         <>
                           <FileImage className="w-8 h-8 opacity-75" />
@@ -337,8 +337,8 @@ export default function SignupPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="text-gray-700 font-bold mb-1.5 block" htmlFor="idProofImage">ID Proof (Aadhaar/School ID)</Label>
-                  <div className="border-2 border-dashed border-emerald-300 rounded-xl p-6 text-center bg-emerald-50/30 hover:bg-emerald-50/70 transition-colors border-2 cursor-pointer relative">
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="idProofImage">ID Proof (Aadhaar/School ID)</Label>
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative">
                     <input 
                       type="file" 
                       id="idProofImage"
@@ -350,7 +350,7 @@ export default function SignupPage() {
                         }
                       }}
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2 text-emerald-900">
+                    <div className="flex flex-col items-center justify-center space-y-2 text-primary">
                       {idProofImage ? (
                         <>
                           <FileImage className="w-8 h-8 opacity-75" />
@@ -370,7 +370,7 @@ export default function SignupPage() {
             </div>
 
             <div className="pt-8 flex justify-end">
-              <Button type="submit" className="w-full md:w-auto min-w-[200px] h-12 text-lg bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-200" disabled={loading}>
+              <Button type="submit" className="w-full md:w-auto min-w-[200px] h-12 text-lg bg-primary hover:bg-primary/95 text-primary-foreground rounded-xl shadow-lg shadow-primary/10" disabled={loading}>
                 {loading ? "Submitting..." : "Submit Registration"}
               </Button>
             </div>
