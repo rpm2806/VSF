@@ -185,7 +185,7 @@ export function VolunteerTableClient({ volunteers }: { volunteers: any[] }) {
                       {v.status}
                     </span>
                   </TableCell>
-                  <TableCell>{new Date(v.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(v.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" })}</TableCell>
                   <TableCell className="text-right">
                     <ResetPasswordDialog volunteerId={v.id} volunteerName={v.name} />
                     <Button 

@@ -49,10 +49,11 @@ export default async function AnnouncementsPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <div className="flex items-center text-xs text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full whitespace-nowrap">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {new Date(announcement.createdAt).toLocaleDateString(undefined, { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
+                      {new Date(announcement.createdAt).toLocaleDateString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit'
                       })}
                     </div>
                     {/* Delete button for master admin only */}

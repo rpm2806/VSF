@@ -233,7 +233,7 @@ export default async function DashboardPage() {
                         {activity.details || activity.action}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(activity.createdAt).toLocaleString()}
+                        {new Date(activity.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
                   ))}

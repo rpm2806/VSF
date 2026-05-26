@@ -200,7 +200,7 @@ export function StudentProfileDialog({ student }: { student: any }) {
           <div>
             <div className="text-sm font-medium text-foreground">Total Pending Dues</div>
             <div className="text-xs text-muted-foreground">
-              ₹1/day since {student.donationStartDate ? new Date(student.donationStartDate).toLocaleDateString() : "joining"}
+              ₹1/day since {student.donationStartDate ? new Date(student.donationStartDate).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" }) : "joining"}
             </div>
           </div>
           <div className="text-2xl font-bold text-orange-600">

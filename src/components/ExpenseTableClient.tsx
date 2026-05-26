@@ -85,7 +85,7 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
                 </TableCell>
                 <TableCell>{expense.category}</TableCell>
                 <TableCell className="font-semibold text-destructive">₹{expense.amount}</TableCell>
-                <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(expense.date).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" })}</TableCell>
                 <TableCell>
                   <Badge 
                     variant="outline" 

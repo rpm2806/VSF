@@ -17,10 +17,10 @@ import { useRouter } from "next/navigation"
 import { Search, Eye, FileText, ImageIcon, CheckCircle2, Clock, RefreshCw } from "lucide-react"
 
 const fmtDate = (d: string | Date) =>
-  new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+  new Date(d).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" })
 
 const fmtDateTime = (d: string | Date) =>
-  new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
+  new Date(d).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
 
 const TYPE_LABELS: Record<string, string> = {
   EDUCATIONAL: "📚 Educational",

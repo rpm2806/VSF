@@ -125,7 +125,7 @@ export default async function DonationsPage() {
                         <div className="text-xs text-muted-foreground mt-0.5 italic">({donation.notes})</div>
                       )}
                     </TableCell>
-                    <TableCell>{new Date(donation.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(donation.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" })}</TableCell>
                     <TableCell>
                       <Badge variant={variant} className={className}>
                         {donation.status}
