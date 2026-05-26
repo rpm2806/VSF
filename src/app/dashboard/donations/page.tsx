@@ -22,7 +22,7 @@ export default async function DonationsPage() {
   const role = session.user.role as string
 
   // Query conditions based on role
-  const whereCondition = role === "STUDENT" ? { studentId: session.user.id } : {}
+  const whereCondition = (role === "STUDENT" || role === "ALUMNI") ? { studentId: session.user.id } : {}
 
   const donations = await db.donation.findMany({
     where: whereCondition,
@@ -44,7 +44,7 @@ export default async function DonationsPage() {
   }
 
   const pendingDonations = donations.filter(d => d.status === "PENDING")
-  const historyDonations = role === "STUDENT" ? donations : donations.filter(d => d.status !== "PENDING" || role === "STUDENT")
+  const historyDonations = (role === "STUDENT" || role === "ALUMNI") ? donations : donations.filter(d => d.status !== "PENDING")
 
   return (
     <div className="space-y-6">
@@ -56,7 +56,7 @@ export default async function DonationsPage() {
         {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && (
           <AddDonationDialog students={students} />
         )}
-        {role === "STUDENT" && (
+        {(role === "STUDENT" || role === "ALUMNI") && (
           <StudentDonationDialog />
         )}
       </div>

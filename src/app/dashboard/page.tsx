@@ -83,7 +83,7 @@ export default async function DashboardPage() {
   let totalStudentDonations = 0
   let studentPendingDues = 0
 
-  if (role === "STUDENT") {
+  if (role === "STUDENT" || role === "ALUMNI") {
     studentData = await db.student.findUnique({ where: { id: session.user.id } })
     const sum = await db.donation.aggregate({
       _sum: { amount: true },
@@ -181,7 +181,7 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {role === "STUDENT" && (
+      {(role === "STUDENT" || role === "ALUMNI") && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card className="shadow-sm border-border/50 bg-gradient-to-br from-primary/10 to-transparent">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -190,7 +190,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-xl font-bold font-mono tracking-wider">{session.user.federationId}</div>
-              <p className="text-xs text-muted-foreground mt-1">Status: ACTIVE</p>
+              <p className="text-xs text-muted-foreground mt-1">Status: {studentData?.status || "ACTIVE"}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-border/50">

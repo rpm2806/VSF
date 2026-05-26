@@ -23,15 +23,15 @@ export default function Sidebar({ userRole, pendingQueries = 0 }: { userRole: st
   const pathname = usePathname()
 
   const navItems = [
-    { name: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT"], badge: 0 },
+    { name: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"], badge: 0 },
     { name: "Students & Alumni", href: "/dashboard/students", icon: GraduationCap, roles: ["MASTER_ADMIN", "VOLUNTEER"], badge: 0 },
     { name: "Batches", href: "/dashboard/batches", icon: Users, roles: ["MASTER_ADMIN", "VOLUNTEER"], badge: 0 },
     { name: "Volunteers", href: "/dashboard/volunteers", icon: Shield, roles: ["MASTER_ADMIN"], badge: 0 },
-    { name: "Donations", href: "/dashboard/donations", icon: HeartHandshake, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT"], badge: 0 },
+    { name: "Donations", href: "/dashboard/donations", icon: HeartHandshake, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"], badge: 0 },
     { name: "Expenses", href: "/dashboard/expenses", icon: Receipt, roles: ["MASTER_ADMIN"], badge: 0 },
-    { name: "Announcements", href: "/dashboard/announcements", icon: Bell, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT"], badge: 0 },
+    { name: "Announcements", href: "/dashboard/announcements", icon: Bell, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"], badge: 0 },
     { name: "Queries", href: "/dashboard/queries", icon: MessageCircle, roles: ["MASTER_ADMIN"], badge: pendingQueries },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["MASTER_ADMIN", "STUDENT"], badge: 0 },
+    { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["MASTER_ADMIN", "STUDENT", "ALUMNI"], badge: 0 },
   ].filter(item => item.roles.includes(userRole))
 
   return (
