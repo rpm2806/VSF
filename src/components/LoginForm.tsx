@@ -33,6 +33,32 @@ export default function LoginForm() {
     setLoading(true)
     
     try {
+      // Pre-check student verification status
+      const statusRes = await fetch("/api/auth/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ aadhaarNumber, dob })
+      })
+
+      if (statusRes.ok) {
+        const data = await statusRes.json()
+        if (data.status === "INVALID") {
+          toast.error("Invalid Aadhaar Number or Date of Birth")
+          setLoading(false)
+          return
+        }
+        if (data.status === "PENDING_APPROVAL") {
+          toast.error("Your registration is pending admin verification. Please wait.")
+          setLoading(false)
+          return
+        }
+        if (data.status === "INACTIVE") {
+          toast.error("Your account has been deactivated. Please contact administration.")
+          setLoading(false)
+          return
+        }
+      }
+
       const res = await signIn("student-login", {
         aadhaarNumber,
         dob,
