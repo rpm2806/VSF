@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Check, X } from "lucide-react"
+import { Check, X, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import {
@@ -36,6 +36,21 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
       router.refresh()
     } catch (_err) {
       toast.error("Something went wrong.")
+    } finally {
+      setLoadingId(null)
+    }
+  }
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Permanently delete expense "${title}"? This cannot be undone.`)) return
+    setLoadingId(id)
+    try {
+      const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed to delete")
+      toast.success("Expense deleted")
+      router.refresh()
+    } catch (_err) {
+      toast.error("Could not delete expense")
     } finally {
       setLoadingId(null)
     }
@@ -85,28 +100,41 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
                 </TableCell>
                 {role === "MASTER_ADMIN" && (
                   <TableCell>
-                    {expense.status === "PENDING" && (
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                          disabled={loadingId === expense.id}
-                          onClick={() => handleStatusChange(expense.id, "APPROVED")}
-                        >
-                          <Check className="w-4 h-4 mr-1" /> Approve
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          disabled={loadingId === expense.id}
-                          onClick={() => handleStatusChange(expense.id, "REJECTED")}
-                        >
-                          <X className="w-4 h-4 mr-1" /> Reject
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {expense.status === "PENDING" && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            disabled={loadingId === expense.id}
+                            onClick={() => handleStatusChange(expense.id, "APPROVED")}
+                          >
+                            <Check className="w-4 h-4 mr-1" /> Approve
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            disabled={loadingId === expense.id}
+                            onClick={() => handleStatusChange(expense.id, "REJECTED")}
+                          >
+                            <X className="w-4 h-4 mr-1" /> Reject
+                          </Button>
+                        </>
+                      )}
+                      {/* Delete always visible for master admin */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                        disabled={loadingId === expense.id}
+                        onClick={() => handleDelete(expense.id, expense.title)}
+                        title="Delete expense"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 )}
               </TableRow>
