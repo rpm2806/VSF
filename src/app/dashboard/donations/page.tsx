@@ -42,7 +42,7 @@ export default async function DonationsPage() {
   if (role === "MASTER_ADMIN" || role === "VOLUNTEER") {
     students = await db.student.findMany({
       select: { id: true, fullName: true, federationId: true },
-      where: { status: "ACTIVE" }
+      where: { status: "ACTIVE", deletedAt: null }
     })
   }
 

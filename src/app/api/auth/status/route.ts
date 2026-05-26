@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       where: { aadhaarNumber }
     })
 
-    if (!student || student.dob !== dob) {
+    if (!student || student.deletedAt || student.dob !== dob) {
       return NextResponse.json({ status: "INVALID" })
     }
 

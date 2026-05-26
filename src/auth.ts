@@ -57,8 +57,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { aadhaarNumber: credentials.aadhaarNumber as string }
         })
 
-        // Verify that the student exists, DOB matches, and status is verified (ACTIVE or ALUMNI)
-        if (student && student.dob === credentials.dob) {
+        // Verify that the student exists, is not deleted, DOB matches, and status is verified (ACTIVE or ALUMNI)
+        if (student && !student.deletedAt && student.dob === credentials.dob) {
           if (student.status !== "ACTIVE" && student.status !== "ALUMNI") {
             return null
           }

@@ -19,23 +19,23 @@ export default async function DashboardPage() {
   let monthlyData: any[] = []
 
   if (role === "MASTER_ADMIN" || role === "VOLUNTEER") {
-    totalStudents = await db.student.count({ where: { status: "ACTIVE" } })
+    totalStudents = await db.student.count({ where: { status: "ACTIVE", deletedAt: null } })
     const sum = await db.donation.aggregate({
       _sum: { amount: true },
-      where: { status: "PAID" }
+      where: { status: "PAID", deletedAt: null }
     })
     totalDonations = sum._sum.amount || 0
 
     const expSum = await db.expense.aggregate({
       _sum: { amount: true },
-      where: { status: "APPROVED" }
+      where: { status: "APPROVED", deletedAt: null }
     })
     totalExpenses = expSum._sum.amount || 0
 
     // Calculate total pending dues for the admin
     const activeStudents = await db.student.findMany({
-      where: { status: "ACTIVE" },
-      include: { donations: { where: { status: "PAID" } } }
+      where: { status: "ACTIVE", deletedAt: null },
+      include: { donations: { where: { status: "PAID", deletedAt: null } } }
     })
 
     activeStudents.forEach(student => {
@@ -57,10 +57,10 @@ export default async function DashboardPage() {
     // Prepare chart data for current year
     const currentYear = new Date().getFullYear()
     const yearlyDonations = await db.donation.findMany({
-      where: { status: "PAID", createdAt: { gte: new Date(`${currentYear}-01-01`) } }
+      where: { status: "PAID", deletedAt: null, createdAt: { gte: new Date(`${currentYear}-01-01`) } }
     })
     const yearlyExpenses = await db.expense.findMany({
-      where: { status: "APPROVED", createdAt: { gte: new Date(`${currentYear}-01-01`) } }
+      where: { status: "APPROVED", deletedAt: null, date: { gte: new Date(`${currentYear}-01-01`) } }
     })
 
     monthlyData = Array.from({ length: 12 }, (_, i) => ({
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
     studentData = await db.student.findUnique({ where: { id: session.user.id } })
     const sum = await db.donation.aggregate({
       _sum: { amount: true },
-      where: { studentId: session.user.id, status: "PAID" }
+      where: { studentId: session.user.id, status: "PAID", deletedAt: null }
     })
     totalStudentDonations = sum._sum.amount || 0
 
