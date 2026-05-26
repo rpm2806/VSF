@@ -59,10 +59,19 @@ export function EditStudentDialog({ student }: { student: any }) {
     setLoading(true)
 
     try {
+      // Convert all text values to uppercase
+      const uppercaseData: any = { ...formData }
+      Object.keys(uppercaseData).forEach(key => {
+        const val = uppercaseData[key]
+        if (typeof val === "string") {
+          uppercaseData[key] = val.toUpperCase()
+        }
+      })
+
       const response = await fetch(`/api/students/${student.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(uppercaseData)
       })
 
       if (!response.ok) throw new Error("Failed to update student")

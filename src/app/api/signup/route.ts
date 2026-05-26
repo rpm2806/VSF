@@ -7,25 +7,25 @@ export async function POST(req: Request) {
     const formData = await req.formData()
     
     // Extract textual fields
-    const fullName = formData.get("fullName") as string
+    const fullName = (formData.get("fullName") as string || "").toUpperCase()
     const mobileNumber = formData.get("mobileNumber") as string
-    const email = formData.get("email") as string
-    const role = formData.get("role") as string || "STUDENT"
+    const email = (formData.get("email") as string || "").toUpperCase()
+    const role = (formData.get("role") as string || "STUDENT").toUpperCase()
     const joiningYear = formData.get("joiningYear") as string
-    const batch = formData.get("batch") as string
-    const studentClass = formData.get("class") as string
-    const bloodGroup = formData.get("bloodGroup") as string
-    const aadhaarNumber = formData.get("aadhaarNumber") as string
+    const batch = (formData.get("batch") as string || "").toUpperCase()
+    const studentClass = (formData.get("class") as string || "").toUpperCase()
+    const bloodGroup = (formData.get("bloodGroup") as string || "").toUpperCase()
+    const aadhaarNumber = (formData.get("aadhaarNumber") as string || "").toUpperCase()
     const dob = formData.get("dob") as string
-    const fatherName = formData.get("fatherName") as string
-    const motherName = formData.get("motherName") as string
+    const fatherName = (formData.get("fatherName") as string || "").toUpperCase()
+    const motherName = (formData.get("motherName") as string || "").toUpperCase()
     const parentContact = formData.get("parentContact") as string
-    const lastSchool = formData.get("lastSchool") as string
-    const specialization = formData.get("specialization") as string
-    const permanentAddress = formData.get("permanentAddress") as string
-    const currentAddress = formData.get("currentAddress") as string
-    const bio = formData.get("bio") as string
-    const workingAt = formData.get("workingAt") as string
+    const lastSchool = (formData.get("lastSchool") as string || "").toUpperCase()
+    const specialization = (formData.get("specialization") as string || "").toUpperCase()
+    const permanentAddress = (formData.get("permanentAddress") as string || "").toUpperCase()
+    const currentAddress = (formData.get("currentAddress") as string || "").toUpperCase()
+    const bio = (formData.get("bio") as string || "").toUpperCase()
+    const workingAt = (formData.get("workingAt") as string || "").toUpperCase()
 
     // Check existing
     if (mobileNumber) {

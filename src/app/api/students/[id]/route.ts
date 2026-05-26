@@ -49,28 +49,28 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // Only update fields that are explicitly provided in the payload
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {}
-    if (fullName !== undefined) updateData.fullName = fullName
+    if (fullName !== undefined) updateData.fullName = fullName ? fullName.toUpperCase() : ""
     if (mobileNumber !== undefined) updateData.mobileNumber = mobileNumber
-    if (email !== undefined) updateData.email = email || null
-    if (batch !== undefined) updateData.batch = batch || null
-    if (studentClass !== undefined) updateData.class = studentClass || null
-    if (bloodGroup !== undefined) updateData.bloodGroup = bloodGroup || null
-    if (aadhaarNumber !== undefined) updateData.aadhaarNumber = aadhaarNumber || null
+    if (email !== undefined) updateData.email = email ? email.toUpperCase() : null
+    if (batch !== undefined) updateData.batch = batch ? batch.toUpperCase() : null
+    if (studentClass !== undefined) updateData.class = studentClass ? studentClass.toUpperCase() : null
+    if (bloodGroup !== undefined) updateData.bloodGroup = bloodGroup ? bloodGroup.toUpperCase() : null
+    if (aadhaarNumber !== undefined) updateData.aadhaarNumber = aadhaarNumber ? aadhaarNumber.toUpperCase() : null
     if (dob !== undefined) updateData.dob = dob || null
     if (duesAmount !== undefined) updateData.duesAmount = duesAmount ? parseFloat(duesAmount.toString()) : 0
     if (donationStartDate !== undefined) updateData.donationStartDate = donationStartDate ? new Date(donationStartDate) : null
-    if (lastSchool !== undefined) updateData.lastSchool = lastSchool || null
-    if (specialization !== undefined) updateData.specialization = specialization || null
-    if (permanentAddress !== undefined) updateData.permanentAddress = permanentAddress || null
-    if (currentAddress !== undefined) updateData.currentAddress = currentAddress || null
-    if (bio !== undefined) updateData.bio = bio || null
-    if (workingAt !== undefined) updateData.workingAt = workingAt || null
-    if (fatherName !== undefined) updateData.fatherName = fatherName || null
-    if (motherName !== undefined) updateData.motherName = motherName || null
+    if (lastSchool !== undefined) updateData.lastSchool = lastSchool ? lastSchool.toUpperCase() : null
+    if (specialization !== undefined) updateData.specialization = specialization ? specialization.toUpperCase() : null
+    if (permanentAddress !== undefined) updateData.permanentAddress = permanentAddress ? permanentAddress.toUpperCase() : null
+    if (currentAddress !== undefined) updateData.currentAddress = currentAddress ? currentAddress.toUpperCase() : null
+    if (bio !== undefined) updateData.bio = bio ? bio.toUpperCase() : null
+    if (workingAt !== undefined) updateData.workingAt = workingAt ? workingAt.toUpperCase() : null
+    if (fatherName !== undefined) updateData.fatherName = fatherName ? fatherName.toUpperCase() : null
+    if (motherName !== undefined) updateData.motherName = motherName ? motherName.toUpperCase() : null
     if (parentContact !== undefined) updateData.parentContact = parentContact || null
     if (joiningYear !== undefined) updateData.joiningYear = joiningYear ? parseInt(joiningYear.toString()) : undefined
-    if (status !== undefined) updateData.status = status
-    if (role !== undefined) updateData.role = role
+    if (status !== undefined) updateData.status = status ? status.toUpperCase() : undefined
+    if (role !== undefined) updateData.role = role ? role.toUpperCase() : undefined
 
     const student = await db.student.update({
       where: { id: studentId },

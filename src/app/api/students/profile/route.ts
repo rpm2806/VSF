@@ -34,17 +34,17 @@ export async function PATCH(req: Request) {
       where: { id: studentId },
       data: {
         mobileNumber,
-        email,
-        fatherName,
-        motherName,
+        email: email ? email.toUpperCase() : null,
+        fatherName: fatherName ? fatherName.toUpperCase() : null,
+        motherName: motherName ? motherName.toUpperCase() : null,
         parentContact,
-        permanentAddress,
-        currentAddress,
-        lastSchool,
-        specialization,
-        bio,
-        workingAt,
-        bloodGroup
+        permanentAddress: permanentAddress ? permanentAddress.toUpperCase() : null,
+        currentAddress: currentAddress ? currentAddress.toUpperCase() : null,
+        lastSchool: lastSchool ? lastSchool.toUpperCase() : null,
+        specialization: specialization ? specialization.toUpperCase() : null,
+        bio: bio ? bio.toUpperCase() : null,
+        workingAt: workingAt ? workingAt.toUpperCase() : null,
+        bloodGroup: bloodGroup ? bloodGroup.toUpperCase() : null
       }
     })
 

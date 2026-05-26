@@ -52,7 +52,25 @@ export default function SignupPage() {
       return
     }
     if (!idProofImage) {
-      toast.error("Please upload your ID Proof document.")
+      toast.error("Please upload your ID Proof photo.")
+      setLoading(false)
+      return
+    }
+
+    // Strict validation: PNG, JPG, JPEG only
+    const validExtensions = ["png", "jpg", "jpeg"]
+    const getExtension = (fileName: string) => fileName.split('.').pop()?.toLowerCase() || ""
+    
+    const profileExt = getExtension(profileImage.name)
+    const idProofExt = getExtension(idProofImage.name)
+
+    if (!validExtensions.includes(profileExt) || !profileImage.type.startsWith("image/")) {
+      toast.error("Profile Photo must be a PNG, JPG or JPEG image file only.")
+      setLoading(false)
+      return
+    }
+    if (!validExtensions.includes(idProofExt) || !idProofImage.type.startsWith("image/")) {
+      toast.error("ID Proof must be a PNG, JPG or JPEG image file only.")
       setLoading(false)
       return
     }
@@ -60,7 +78,11 @@ export default function SignupPage() {
     try {
       const data = new FormData()
       Object.entries(formData).forEach(([key, value]) => {
-        if (value) data.append(key, value)
+        if (value) {
+          // Normalize text values to uppercase
+          const upperVal = typeof value === "string" ? value.toUpperCase() : value
+          data.append(key, upperVal)
+        }
       })
       if (profileImage) data.append("profileImage", profileImage)
       if (idProofImage) data.append("idProofImage", idProofImage)
@@ -331,7 +353,7 @@ export default function SignupPage() {
                       type="file" 
                       id="profileImage"
                       required
-                      accept="image/*"
+                      accept="image/png, image/jpeg, image/jpg"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
@@ -359,7 +381,7 @@ export default function SignupPage() {
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
                           <span className="text-sm font-medium">Click to upload photo</span>
-                          <span className="text-xs opacity-75">JPEG, PNG up to 5MB</span>
+                          <span className="text-xs opacity-75">PNG, JPG or JPEG up to 5MB</span>
                         </>
                       )}
                     </div>
@@ -373,7 +395,7 @@ export default function SignupPage() {
                       type="file" 
                       id="idProofImage"
                       required
-                      accept="image/*"
+                      accept="image/png, image/jpeg, image/jpg"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
@@ -401,7 +423,7 @@ export default function SignupPage() {
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
                           <span className="text-sm font-medium">Click to upload ID photo</span>
-                          <span className="text-xs opacity-75">JPEG, PNG up to 5MB</span>
+                          <span className="text-xs opacity-75">PNG, JPG or JPEG up to 5MB</span>
                         </>
                       )}
                     </div>

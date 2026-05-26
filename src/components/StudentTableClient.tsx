@@ -100,50 +100,139 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
     }
   }
 
-  const exportToCSV = () => {
+  const exportToExcel = () => {
     if (sortedStudents.length === 0) return
+
+    const escapeXml = (unsafe: string): string => {
+      if (typeof unsafe !== 'string') return String(unsafe);
+      return unsafe.replace(/[<>&'"]/g, (c) => {
+        switch (c) {
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '&': return '&amp;';
+          case '\'': return '&apos;';
+          case '"': return '&quot;';
+          default: return c;
+        }
+      });
+    }
 
     const headers = [
       "Federation ID",
       "Full Name",
       "Mobile Number",
       "Email",
-      "Class",
+      "Role",
+      "Status",
+      "Class/Graduated in 20XX",
       "Batch",
       "Joining Year",
+      "DOB",
       "Blood Group",
-      "Status",
+      "Father's Name",
+      "Mother's Name",
+      "Parent's Contact",
+      "Aadhaar Number",
+      "Last School/College",
+      "Specialization",
+      "Permanent Address",
+      "Current Address",
+      "Working At",
+      "Bio",
       "Pending Dues",
       "Advance Balance",
-      "Role"
+      "Donation Start Date",
+      "Created At",
+      "Profile Photo URL",
+      "ID Proof URL"
     ]
 
-    const csvRows = [headers.join(",")]
+    let xml = `<?xml version="1.0" encoding="utf-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Vriksh Students Federation</Author>
+  <Created>${new Date().toISOString()}</Created>
+ </DocumentProperties>
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/>
+   <Interior ss:Color="#047857" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="Default">
+   <Alignment ss:Vertical="Center"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Students List">
+  <Table>
+`
 
+    // Add headers row
+    xml += '   <Row ss:Height="24">\n'
+    headers.forEach(h => {
+      xml += `    <Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXml(h)}</Data></Cell>\n`
+    })
+    xml += '   </Row>\n'
+
+    // Add data rows
     for (const s of sortedStudents) {
-      const row = [
+      xml += '   <Row ss:Height="18">\n'
+      
+      const profileUrl = s.profileImage ? `${window.location.origin}/api/secure-image?url=${encodeURIComponent(s.profileImage)}` : "";
+      const idProofUrl = s.idProofImage ? `${window.location.origin}/api/secure-image?url=${encodeURIComponent(s.idProofImage)}` : "";
+
+      const rowValues = [
         s.federationId || "",
-        `"${(s.fullName || "").replace(/"/g, '""')}"`,
+        s.fullName || "",
         s.mobileNumber || "",
         s.email || "",
+        s.role || "",
+        s.status || "",
         s.class || "",
         s.batch || "",
-        s.joiningYear || "",
+        s.joiningYear?.toString() || "",
+        s.dob || "",
         s.bloodGroup || "",
-        s.status || "",
-        s.pendingDues || 0,
-        s.advanceBalance || 0,
-        s.role || ""
+        s.fatherName || "",
+        s.motherName || "",
+        s.parentContact || "",
+        s.aadhaarNumber || "",
+        s.lastSchool || "",
+        s.specialization || "",
+        s.permanentAddress || "",
+        s.currentAddress || "",
+        s.workingAt || "",
+        s.bio || "",
+        s.pendingDues?.toString() || "0",
+        s.advanceBalance?.toString() || "0",
+        s.donationStartDate ? new Date(s.donationStartDate).toISOString().split('T')[0] : "",
+        s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : "",
+        profileUrl,
+        idProofUrl
       ]
-      csvRows.push(row.join(","))
+
+      rowValues.forEach(val => {
+        const isNum = !isNaN(Number(val)) && val.trim() !== "";
+        const type = isNum ? "Number" : "String";
+        xml += `    <Cell><Data ss:Type="${type}">${escapeXml(val)}</Data></Cell>\n`
+      })
+      xml += '   </Row>\n'
     }
 
-    const csvContent = csvRows.join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    xml += `  </Table>
+ </Worksheet>
+</Workbook>`
+
+    const blob = new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.setAttribute("href", url)
-    link.setAttribute("download", `students_export_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute("download", `students_export_${new Date().toISOString().split('T')[0]}.xls`)
     link.style.visibility = "hidden"
     document.body.appendChild(link)
     link.click()
@@ -193,9 +282,9 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
             <RenameBatchDialog oldName={batchFilter} />
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-2">
+        <Button variant="outline" size="sm" onClick={exportToExcel} className="gap-2">
           <Download className="w-4 h-4" />
-          Export CSV
+          Export Excel
         </Button>
       </div>
       
