@@ -261,7 +261,7 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-1">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="lastSchool">Last School / College *</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="lastSchool">Current/Last - School/College *</Label>
                   <Input 
                     id="lastSchool" 
                     required

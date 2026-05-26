@@ -273,7 +273,7 @@ export function AddStudentDialog({ initialBatch }: { initialBatch?: string }) {
             </div>
           </div>
           <div className="space-y-2 col-span-2">
-            <Label htmlFor="lastSchool">Last School / College</Label>
+            <Label htmlFor="lastSchool">Current/Last - School/College</Label>
             <Input 
               id="lastSchool" 
               value={formData.lastSchool}
