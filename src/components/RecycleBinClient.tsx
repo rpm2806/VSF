@@ -4,12 +4,20 @@ import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import {
   Trash2, RotateCcw, Clock, HeartHandshake,
-  Receipt, Bell, AlertTriangle, RefreshCw, X
+  Receipt, Bell, AlertTriangle, RefreshCw, GraduationCap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+interface DeletedStudent {
+  id: string
+  fullName: string
+  federationId: string
+  mobileNumber: string
+  status: string
+  deletedAt: string
+}
 interface DeletedDonation {
   id: string
   amount: number
@@ -68,12 +76,13 @@ function ExpiryBadge({ deletedAt }: { deletedAt: string }) {
 
 // ─── RecycleBinClient ─────────────────────────────────────────────────────────
 export default function RecycleBinClient() {
+  const [students, setStudents] = useState<DeletedStudent[]>([])
   const [donations, setDonations] = useState<DeletedDonation[]>([])
   const [expenses, setExpenses] = useState<DeletedExpense[]>([])
   const [announcements, setAnnouncements] = useState<DeletedAnnouncement[]>([])
   const [loading, setLoading] = useState(true)
   const [actionId, setActionId] = useState<string | null>(null)
-  const [tab, setTab] = useState<"all" | "donations" | "expenses" | "announcements">("all")
+  const [tab, setTab] = useState<"all" | "students" | "donations" | "expenses" | "announcements">("all")
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -81,6 +90,7 @@ export default function RecycleBinClient() {
       const res = await fetch("/api/recycle-bin")
       if (!res.ok) throw new Error("Failed to load")
       const data = await res.json()
+      setStudents(data.students)
       setDonations(data.donations)
       setExpenses(data.expenses)
       setAnnouncements(data.announcements)
@@ -111,29 +121,11 @@ export default function RecycleBinClient() {
     }
   }
 
-  const permanentDelete = async (type: string, id: string, label: string) => {
-    if (!confirm(`Permanently delete "${label}"? This CANNOT be undone and it will be gone forever.`)) return
-    setActionId(id)
-    try {
-      const res = await fetch("/api/recycle-bin", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, id })
-      })
-      if (!res.ok) throw new Error("Failed to delete")
-      toast.success("Permanently deleted")
-      fetchData()
-    } catch {
-      toast.error("Could not delete item")
-    } finally {
-      setActionId(null)
-    }
-  }
-
-  const total = donations.length + expenses.length + announcements.length
+  const total = students.length + donations.length + expenses.length + announcements.length
 
   const tabs = [
     { key: "all", label: "All", count: total },
+    { key: "students", label: "Students", count: students.length, icon: GraduationCap },
     { key: "donations", label: "Payments", count: donations.length, icon: HeartHandshake },
     { key: "expenses", label: "Expenses", count: expenses.length, icon: Receipt },
     { key: "announcements", label: "Announcements", count: announcements.length, icon: Bell },
@@ -237,11 +229,6 @@ export default function RecycleBinClient() {
                   disabled={actionId === d.id} onClick={() => restore("donation", d.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
                 </Button>
-                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 hover:text-rose-700"
-                  disabled={actionId === d.id} onClick={() => permanentDelete("donation", d.id, `₹${d.amount} payment`)}
-                  title="Delete permanently">
-                  <X className="w-3.5 h-3.5" />
-                </Button>
               </div>
             </div>
           ))}
@@ -280,11 +267,6 @@ export default function RecycleBinClient() {
                   disabled={actionId === e.id} onClick={() => restore("expense", e.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
                 </Button>
-                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 hover:text-rose-700"
-                  disabled={actionId === e.id} onClick={() => permanentDelete("expense", e.id, e.title)}
-                  title="Delete permanently">
-                  <X className="w-3.5 h-3.5" />
-                </Button>
               </div>
             </div>
           ))}
@@ -314,10 +296,40 @@ export default function RecycleBinClient() {
                   disabled={actionId === a.id} onClick={() => restore("announcement", a.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
                 </Button>
-                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 hover:text-rose-700"
-                  disabled={actionId === a.id} onClick={() => permanentDelete("announcement", a.id, a.title)}
-                  title="Delete permanently">
-                  <X className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          ))}
+
+          {/* ── Students ── */}
+          {(tab === "all" || tab === "students") && students.map(s => (
+            <div key={s.id} className="group relative rounded-2xl border bg-card p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Student</p>
+                    <p className="font-bold text-indigo-600">{s.federationId}</p>
+                  </div>
+                </div>
+                <ExpiryBadge deletedAt={s.deletedAt} />
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-semibold text-sm">{s.fullName}</p>
+                <p className="text-xs text-muted-foreground">{s.mobileNumber}</p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="outline" className="text-[10px]">{s.status}</Badge>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">Deleted {timeAgo(s.deletedAt)}</p>
+
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300"
+                  disabled={actionId === s.id} onClick={() => restore("student", s.id)}>
+                  <RotateCcw className="w-3.5 h-3.5" /> Restore
                 </Button>
               </div>
             </div>

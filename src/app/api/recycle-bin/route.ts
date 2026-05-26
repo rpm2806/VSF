@@ -16,7 +16,11 @@ export async function GET() {
     const threeMonthsAgo = new Date()
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
 
-    const [donations, expenses, announcements] = await Promise.all([
+    const [students, donations, expenses, announcements] = await Promise.all([
+      db.student.findMany({
+        where: { deletedAt: { not: null, gte: threeMonthsAgo } },
+        orderBy: { deletedAt: "desc" }
+      }),
       db.donation.findMany({
         where: { deletedAt: { not: null, gte: threeMonthsAgo } },
         include: {
@@ -35,7 +39,7 @@ export async function GET() {
       }),
     ])
 
-    return NextResponse.json({ donations, expenses, announcements })
+    return NextResponse.json({ students, donations, expenses, announcements })
   } catch (error) {
     console.error("[RECYCLE_BIN_GET]", error)
     return new NextResponse("Internal Error", { status: 500 })
@@ -54,7 +58,9 @@ export async function POST(req: Request) {
     const { type, id } = await req.json()
     if (!type || !id) return new NextResponse("Missing type or id", { status: 400 })
 
-    if (type === "donation") {
+    if (type === "student") {
+      await db.student.update({ where: { id }, data: { deletedAt: null } })
+    } else if (type === "donation") {
       await db.donation.update({ where: { id }, data: { deletedAt: null } })
     } else if (type === "expense") {
       await db.expense.update({ where: { id }, data: { deletedAt: null } })
@@ -79,40 +85,3 @@ export async function POST(req: Request) {
   }
 }
 
-// DELETE: permanently delete an item
-export async function DELETE(req: Request) {
-  try {
-    const session = await auth()
-    if (!session?.user) return new NextResponse("Unauthorized", { status: 401 })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userRole = (session.user as any).role
-    if (userRole !== "MASTER_ADMIN") return new NextResponse("Forbidden", { status: 403 })
-
-    const { type, id } = await req.json()
-    if (!type || !id) return new NextResponse("Missing type or id", { status: 400 })
-
-    if (type === "donation") {
-      await db.receipt.deleteMany({ where: { donationId: id } })
-      await db.donation.delete({ where: { id } })
-    } else if (type === "expense") {
-      await db.expense.delete({ where: { id } })
-    } else if (type === "announcement") {
-      await db.announcement.delete({ where: { id } })
-    } else {
-      return new NextResponse("Invalid type", { status: 400 })
-    }
-
-    await logActivity({
-      userId: session.user.id,
-      action: "ITEM_PERMANENTLY_DELETED",
-      entityType: type.toUpperCase(),
-      entityId: id,
-      details: `Permanently deleted ${type}`
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("[RECYCLE_BIN_DELETE]", error)
-    return new NextResponse("Internal Error", { status: 500 })
-  }
-}

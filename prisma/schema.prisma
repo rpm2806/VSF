@@ -58,6 +58,8 @@ model Student {
 
   donations     Donation[]
   receipts      Receipt[]
+
+  deletedAt     DateTime?
 }
 
 model Donation {

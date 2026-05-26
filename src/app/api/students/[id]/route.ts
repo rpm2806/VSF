@@ -109,13 +109,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const resolvedParams = await params
     const studentId = resolvedParams.id
 
-    // Cascade delete dependent records first
-    await db.receipt.deleteMany({ where: { studentId } })
-    await db.donation.deleteMany({ where: { studentId } })
-    
-    // Delete the student
-    const student = await db.student.delete({
-      where: { id: studentId }
+    // Soft delete the student
+    const student = await db.student.update({
+      where: { id: studentId },
+      data: { deletedAt: new Date() }
     })
 
     // Log Activity
@@ -124,10 +121,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       action: "STUDENT_DELETED",
       entityType: "STUDENT",
       entityId: studentId,
-      details: `Admin deleted student: ${student.fullName} (${student.federationId})`
+      details: `Admin moved student to recycle bin: ${student.fullName} (${student.federationId})`
     })
 
-    return NextResponse.json({ success: true, message: "Student deleted successfully" })
+    return NextResponse.json({ success: true, message: "Student moved to recycle bin successfully" })
   } catch (error) {
     console.error("[STUDENT_DELETE]", error)
     return new NextResponse("Internal Error", { status: 500 })

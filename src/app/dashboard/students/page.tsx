@@ -12,8 +12,9 @@ export default async function StudentsPage() {
   }
 
   const dbStudents = await db.student.findMany({
+    where: { deletedAt: null },
     orderBy: { createdAt: "desc" },
-    include: { donations: { where: { status: "PAID" } } }
+    include: { donations: { where: { status: "PAID", deletedAt: null } } }
   })
 
   // Calculate pending dues and advance balance per student
