@@ -78,7 +78,7 @@ export default async function DonationsPage() {
       </div>
 
       {isAdminOrVolunteer && (
-        <VerificationQueue donations={pendingDonations} />
+        <VerificationQueue donations={pendingDonations} isMasterAdmin={isMasterAdmin} />
       )}
 
       <div className="rounded-md border bg-card">
@@ -125,9 +125,8 @@ export default async function DonationsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {isAdminOrVolunteer ? (
-                          /* Admin/Volunteer: always show proof + receipt whenever they exist */
                           <>
                             {donation.receipt && (
                               <a
@@ -147,7 +146,6 @@ export default async function DonationsPage() {
                             )}
                           </>
                         ) : (
-                          /* Student/Alumni: status-based view */
                           <>
                             {donation.status === "PAID" ? (
                               donation.receipt ? (
@@ -171,11 +169,11 @@ export default async function DonationsPage() {
                             )}
                           </>
                         )}
+                        {/* Master Admin delete button — always visible */}
+                        {isMasterAdmin && (
+                          <DeleteDonationButton id={donation.id} amount={donation.amount} />
+                        )}
                       </div>
-                      {/* Master Admin delete button */}
-                      {isMasterAdmin && (
-                        <DeleteDonationButton id={donation.id} amount={donation.amount} />
-                      )}
                     </TableCell>
                   </TableRow>
                 )

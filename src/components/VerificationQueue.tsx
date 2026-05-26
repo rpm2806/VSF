@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ExternalLink, CheckCircle2, XCircle } from "lucide-react"
+import { ExternalLink, CheckCircle2, XCircle, Trash2 } from "lucide-react"
 
 import {
   Dialog,
@@ -26,10 +26,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function VerificationQueue({ donations }: { donations: any[] }) {
+export default function VerificationQueue({ donations, isMasterAdmin = false }: { donations: any[]; isMasterAdmin?: boolean }) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [rejectLoadingId, setRejectLoadingId] = useState<string | null>(null)
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null)
   
   const [selectedDonation, setSelectedDonation] = useState<{ id: string; proof: string; name: string; amount: number } | null>(null)
   const [rejectDialogId, setRejectDialogId] = useState<string | null>(null)
@@ -81,6 +82,26 @@ export default function VerificationQueue({ donations }: { donations: any[] }) {
     }
   }
 
+  const handleDelete = async (id: string, amount: number) => {
+    if (!confirm(`Permanently delete this ₹${amount} pending payment? This cannot be undone.`)) return
+    setDeleteLoadingId(id)
+    try {
+      const res = await fetch("/api/donations", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      })
+      if (!res.ok) throw new Error("Failed to delete")
+      toast.success("Payment record deleted")
+      router.refresh()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred")
+    } finally {
+      setDeleteLoadingId(null)
+    }
+  }
+
   if (donations.length === 0) return null
 
   return (
@@ -128,7 +149,7 @@ export default function VerificationQueue({ donations }: { donations: any[] }) {
                     <Button 
                       size="sm" 
                       onClick={() => handleVerify(donation.id)}
-                      disabled={loadingId === donation.id || rejectLoadingId === donation.id}
+                      disabled={loadingId === donation.id || rejectLoadingId === donation.id || deleteLoadingId === donation.id}
                       className="h-8 bg-emerald-600 hover:bg-emerald-700 gap-1"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
@@ -138,12 +159,24 @@ export default function VerificationQueue({ donations }: { donations: any[] }) {
                       size="sm"
                       variant="outline"
                       onClick={() => { setRejectDialogId(donation.id); setRejectReason("") }}
-                      disabled={loadingId === donation.id || rejectLoadingId === donation.id}
+                      disabled={loadingId === donation.id || rejectLoadingId === donation.id || deleteLoadingId === donation.id}
                       className="h-8 border-rose-300 text-rose-600 hover:bg-rose-50 hover:border-rose-400 gap-1"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       Reject
                     </Button>
+                    {isMasterAdmin && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(donation.id, donation.amount)}
+                        disabled={loadingId === donation.id || rejectLoadingId === donation.id || deleteLoadingId === donation.id}
+                        className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                        title="Delete this payment record"
+                      >
+                        {deleteLoadingId === donation.id ? "..." : <Trash2 className="w-3.5 h-3.5" />}
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
