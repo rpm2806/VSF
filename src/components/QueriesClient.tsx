@@ -241,11 +241,11 @@ export function QueriesClient({ requests }: { requests: any[] }) {
                   {isImage(selected.attachmentUrl) ? (
                     <div className="rounded-2xl overflow-hidden border border-border">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={selected.attachmentUrl} alt="attachment" className="w-full max-h-80 object-contain bg-muted" />
+                      <img src={`/api/secure-image?url=${encodeURIComponent(selected.attachmentUrl)}`} alt="attachment" className="w-full max-h-80 object-contain bg-muted" />
                     </div>
                   ) : (
                     <a
-                      href={selected.attachmentUrl}
+                      href={`/api/secure-image?url=${encodeURIComponent(selected.attachmentUrl)}`}
                       download={selected.attachmentName || "attachment.pdf"}
                       className="flex items-center gap-3 p-3 rounded-2xl border border-border bg-muted/30 hover:bg-muted transition-colors"
                     >

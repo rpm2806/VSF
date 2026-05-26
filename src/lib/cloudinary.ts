@@ -10,7 +10,7 @@ cloudinary.config({
 export async function uploadBuffer(buffer: Buffer, folder: string): Promise<string> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
-      { folder },
+      { folder, type: "private", resource_type: "auto" },
       (error, result) => {
         if (error) {
           console.error("[CLOUDINARY_BUFFER_UPLOAD_ERROR]", error)
@@ -26,6 +26,8 @@ export async function uploadBase64(base64Data: string, folder: string): Promise<
   try {
     const result = await cloudinary.uploader.upload(base64Data, {
       folder,
+      type: "private",
+      resource_type: "auto"
     })
     return result.secure_url
   } catch (error) {

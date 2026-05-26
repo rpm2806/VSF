@@ -36,7 +36,7 @@ export default function DonationPaymentProofViewer({ proofUrl }: { proofUrl: str
           <div className="w-full rounded-lg overflow-auto border bg-muted/30 flex items-center justify-center" style={{ maxHeight: "65vh" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={proofUrl}
+              src={`/api/secure-image?url=${encodeURIComponent(proofUrl)}`}
               alt="Payment Proof"
               className="w-full h-auto object-contain"
               style={{ maxHeight: "65vh" }}

@@ -69,21 +69,21 @@ export function StudentProfileSettingsForm({ student }: { student: any }) {
             </div>
             {student.profileImage ? (
               <div className="space-y-2">
-                <div className="relative w-full aspect-square max-w-[180px] rounded-xl overflow-hidden border bg-muted/30 shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={student.profileImage}
-                    alt="Profile photo"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
                 <a
-                  href={student.profileImage}
+                  href={`/api/secure-image?url=${encodeURIComponent(student.profileImage)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                  className="group relative block w-full aspect-square max-w-[180px] rounded-xl overflow-hidden border bg-muted/30 shadow-sm"
                 >
-                  <ExternalLink className="w-3 h-3" /> Open full size
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/secure-image?url=${encodeURIComponent(student.profileImage)}`}
+                    alt="Profile"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <ExternalLink className="w-6 h-6 text-white" />
+                  </div>
                 </a>
               </div>
             ) : (
@@ -102,21 +102,21 @@ export function StudentProfileSettingsForm({ student }: { student: any }) {
             </div>
             {student.idProofImage ? (
               <div className="space-y-2">
-                <div className="relative w-full aspect-square max-w-[180px] rounded-xl overflow-hidden border bg-muted/30 shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={student.idProofImage}
-                    alt="ID proof"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
                 <a
-                  href={student.idProofImage}
+                  href={`/api/secure-image?url=${encodeURIComponent(student.idProofImage)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                  className="group relative block w-full aspect-square max-w-[180px] rounded-xl overflow-hidden border bg-muted/30 shadow-sm"
                 >
-                  <ExternalLink className="w-3 h-3" /> Open full size
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/secure-image?url=${encodeURIComponent(student.idProofImage)}`}
+                    alt="ID Proof"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <ExternalLink className="w-6 h-6 text-white" />
+                  </div>
                 </a>
               </div>
             ) : (

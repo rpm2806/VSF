@@ -177,18 +177,18 @@ export function StudentProfileDialog({ student }: { student: any }) {
               {student.profileImage && (
                 <div className="space-y-2">
                   <div className="font-medium text-sm text-foreground">Profile Photo</div>
-                  <a href={student.profileImage} target="_blank" rel="noopener noreferrer" className="block w-32 h-32 relative rounded-xl overflow-hidden border shadow-sm hover:ring-2 hover:ring-emerald-500 transition-all">
+                  <a href={`/api/secure-image?url=${encodeURIComponent(student.profileImage)}`} target="_blank" rel="noopener noreferrer" className="block w-32 h-32 relative rounded-xl overflow-hidden border shadow-sm hover:ring-2 hover:ring-emerald-500 transition-all">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={student.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    <img src={`/api/secure-image?url=${encodeURIComponent(student.profileImage)}`} alt="Profile" className="w-full h-full object-cover" />
                   </a>
                 </div>
               )}
               {student.idProofImage && (
                 <div className="space-y-2">
                   <div className="font-medium text-sm text-foreground">ID Proof (Aadhaar)</div>
-                  <a href={student.idProofImage} target="_blank" rel="noopener noreferrer" className="block w-full max-w-[200px] h-32 relative rounded-xl overflow-hidden border shadow-sm hover:ring-2 hover:ring-emerald-500 transition-all">
+                  <a href={`/api/secure-image?url=${encodeURIComponent(student.idProofImage)}`} target="_blank" rel="noopener noreferrer" className="block w-full max-w-[200px] h-32 relative rounded-xl overflow-hidden border shadow-sm hover:ring-2 hover:ring-emerald-500 transition-all">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={student.idProofImage} alt="ID Proof" className="w-full h-full object-cover" />
+                    <img src={`/api/secure-image?url=${encodeURIComponent(student.idProofImage)}`} alt="ID Proof" className="w-full h-full object-cover" />
                   </a>
                 </div>
               )}

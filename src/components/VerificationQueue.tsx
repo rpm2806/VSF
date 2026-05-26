@@ -198,7 +198,7 @@ export default function VerificationQueue({ donations, isMasterAdmin = false }: 
             {selectedDonation?.proof && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={selectedDonation.proof}
+                src={`/api/secure-image?url=${encodeURIComponent(selectedDonation.proof)}`}
                 alt="Payment Proof"
                 className="w-full h-auto object-contain"
                 style={{ maxHeight: "60vh" }}
