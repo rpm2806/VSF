@@ -97,14 +97,14 @@ export default function StudentDonationDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-2">
-          <div className="flex flex-col items-center justify-center space-y-4 p-4 border rounded-xl bg-muted/30">
-            <p className="text-sm font-medium text-muted-foreground">Vriksh Students Federation</p>
-            <div className="relative w-40 h-40 bg-card rounded-lg p-2 shadow-sm border">
+          <div className="flex flex-col items-center justify-center space-y-3 p-4 border rounded-xl bg-muted/30">
+            <p className="text-sm font-semibold text-primary">Vriksh Students Federation</p>
+            <div className="relative w-44 h-44 bg-card rounded-xl p-1 shadow-sm border overflow-hidden">
               <Image 
                 src="/upi-qr.png" 
                 alt="UPI QR Code" 
                 fill 
-                className="object-contain p-2"
+                className="object-cover"
                 onError={(e) => {
                   // Fallback if image doesn't exist yet
                   const target = e.target as HTMLImageElement;
@@ -112,7 +112,10 @@ export default function StudentDonationDialog() {
                 }}
               />
             </div>
-            <p className="text-xs text-muted-foreground">Scan to pay using any UPI app</p>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-bold text-foreground">Rupam Kumar</p>
+              <p className="text-xs text-muted-foreground">Scan to pay using any UPI app</p>
+            </div>
           </div>
 
           <div className="space-y-4">
