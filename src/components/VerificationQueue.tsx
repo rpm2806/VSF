@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import Image from "next/image"
 import { ExternalLink, CheckCircle2, XCircle } from "lucide-react"
 
 import {
@@ -162,13 +161,14 @@ export default function VerificationQueue({ donations }: { donations: any[] }) {
               Review the payment proof uploaded by <strong>{selectedDonation?.name}</strong> for ₹{selectedDonation?.amount}.
             </DialogDescription>
           </DialogHeader>
-          <div className="relative w-full aspect-[9/16] bg-muted/30 rounded-lg overflow-hidden border max-h-[60vh]">
+          <div className="w-full bg-muted/30 rounded-lg overflow-auto border flex items-center justify-center" style={{ maxHeight: "60vh" }}>
             {selectedDonation?.proof && (
-              <Image 
-                src={selectedDonation.proof} 
-                alt="Payment Proof" 
-                fill 
-                className="object-contain" 
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={selectedDonation.proof}
+                alt="Payment Proof"
+                className="w-full h-auto object-contain"
+                style={{ maxHeight: "60vh" }}
               />
             )}
           </div>

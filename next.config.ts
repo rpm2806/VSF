@@ -9,6 +9,15 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
+    dangerouslyAllowSVG: true,
+  },
 };
 
 export default withPWA(nextConfig);

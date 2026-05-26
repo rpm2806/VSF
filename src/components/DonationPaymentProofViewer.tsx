@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,19 +26,18 @@ export default function DonationPaymentProofViewer({ proofUrl }: { proofUrl: str
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[560px]">
           <DialogHeader>
             <DialogTitle>Payment Screenshot</DialogTitle>
             <DialogDescription>
               Your uploaded payment proof. It is being reviewed by the admin.
             </DialogDescription>
           </DialogHeader>
-          <div className="relative w-full bg-muted/30 rounded-lg overflow-hidden border" style={{ maxHeight: "65vh" }}>
-            <Image
+          <div className="w-full rounded-lg overflow-auto border bg-muted/30 flex items-center justify-center" style={{ maxHeight: "65vh" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={proofUrl}
               alt="Payment Proof"
-              width={500}
-              height={700}
               className="w-full h-auto object-contain"
               style={{ maxHeight: "65vh" }}
             />
