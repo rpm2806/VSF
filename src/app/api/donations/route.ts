@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     if (!session?.user) return new NextResponse("Unauthorized", { status: 401 })
 
     const body = await req.json()
-    const { amount, type, paymentMethod, paymentProof } = body
+    const { amount, type, paymentMethod, paymentProof, notes } = body
     
     // Determine studentId: if student, it's them. If admin, it's from body.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,6 +81,7 @@ export async function POST(req: Request) {
         endYear: monthsCovered > 0 ? endYear : null,
         paymentMethod,
         paymentProof: finalPaymentProof,
+        notes: notes || null,
         status,
         verifiedById: isAdmin ? session.user.id : null,
         verifiedAt: isAdmin ? new Date() : null,

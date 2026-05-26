@@ -30,7 +30,8 @@ export default async function DonationsPage() {
     where: whereCondition,
     include: {
       student: { select: { fullName: true, federationId: true } },
-      receipt: { select: { id: true } }
+      receipt: { select: { id: true } },
+      verifiedBy: { select: { name: true } }
     },
     orderBy: { createdAt: "desc" }
   })
@@ -91,13 +92,14 @@ export default async function DonationsPage() {
               <TableHead>Method</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Verified By</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {historyDonations.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                   No donation history found.
                 </TableCell>
               </TableRow>
@@ -117,12 +119,26 @@ export default async function DonationsPage() {
                         : ''}
                     </TableCell>
                     <TableCell className="font-semibold text-emerald-600">₹{donation.amount}</TableCell>
-                    <TableCell>{donation.paymentMethod}</TableCell>
+                    <TableCell>
+                      <div>{donation.paymentMethod}</div>
+                      {donation.notes && (
+                        <div className="text-xs text-muted-foreground mt-0.5 italic">({donation.notes})</div>
+                      )}
+                    </TableCell>
                     <TableCell>{new Date(donation.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Badge variant={variant} className={className}>
                         {donation.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {donation.verifiedBy ? (
+                        <div className="text-xs">
+                          <span className="font-medium text-emerald-700">{donation.verifiedBy.name}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 flex-wrap">

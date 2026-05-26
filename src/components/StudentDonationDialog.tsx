@@ -27,6 +27,7 @@ export default function StudentDonationDialog() {
   
   const [amount, setAmount] = useState("30")
   const [paymentMethod, setPaymentMethod] = useState<"UPI" | "CASH">("UPI")
+  const [takerName, setTakerName] = useState("")
   const [paymentProof, setPaymentProof] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
@@ -65,6 +66,10 @@ export default function StudentDonationDialog() {
       toast.error("Please upload your UPI payment screenshot before submitting")
       return
     }
+    if (paymentMethod === "CASH" && !takerName.trim()) {
+      toast.error("Please enter the name of the volunteer receiving your cash")
+      return
+    }
 
     setLoading(true)
     
@@ -76,6 +81,7 @@ export default function StudentDonationDialog() {
           amount: parseFloat(amount),
           paymentProof: paymentMethod === "UPI" ? paymentProof : null,
           paymentMethod,
+          notes: paymentMethod === "CASH" ? takerName.trim() : undefined,
           type: "MONTHLY"
         })
       })
@@ -93,6 +99,7 @@ export default function StudentDonationDialog() {
       setOpen(false)
       setAmount("30")
       setPaymentMethod("UPI")
+      setTakerName("")
       setPaymentProof(null)
       setPreviewUrl(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
@@ -189,6 +196,22 @@ export default function StudentDonationDialog() {
             </div>
           )}
 
+          {/* Taker Name for Cash */}
+          {paymentMethod === "CASH" && (
+            <div className="space-y-2">
+              <Label htmlFor="taker-name">
+                Received by (Volunteer Name) <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                id="taker-name"
+                type="text"
+                placeholder="Enter the name of the volunteer receiving cash"
+                value={takerName}
+                onChange={(e) => setTakerName(e.target.value)}
+              />
+            </div>
+          )}
+
           {/* Amount */}
           <div className="space-y-2">
             <Label htmlFor="amount">Amount (₹)</Label>
@@ -267,7 +290,7 @@ export default function StudentDonationDialog() {
           <Button
             type="submit"
             className="w-full"
-            disabled={loading || (paymentMethod === "UPI" && !paymentProof)}
+            disabled={loading || (paymentMethod === "UPI" && !paymentProof) || (paymentMethod === "CASH" && !takerName.trim())}
           >
             {loading ? "Submitting..." : paymentMethod === "CASH" ? "Submit Cash Payment" : "Submit for Verification"}
           </Button>
