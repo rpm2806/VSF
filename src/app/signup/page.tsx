@@ -44,6 +44,17 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
 
+    if (!profileImage) {
+      toast.error("Please upload your Profile Photo.")
+      setLoading(false)
+      return
+    }
+    if (!idProofImage) {
+      toast.error("Please upload your ID Proof document.")
+      setLoading(false)
+      return
+    }
+
     try {
       const data = new FormData()
       Object.entries(formData).forEach(([key, value]) => {
@@ -172,10 +183,11 @@ export default function SignupPage() {
               <h2 className="text-xl font-bold text-primary font-bold">3. Academic & Personal Info</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="dob">Date of Birth</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="dob">Date of Birth *</Label>
                   <Input 
                     id="dob" 
                     type="date"
+                    required
                     value={formData.dob}
                     onChange={e => setFormData({...formData, dob: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
@@ -215,18 +227,20 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="class">Class / Year / Other</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="class">Class / Year / Other *</Label>
                   <Input 
                     id="class" 
+                    required
                     value={formData.class}
                     onChange={e => setFormData({...formData, class: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-1">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="lastSchool">Last School / College</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="lastSchool">Last School / College *</Label>
                   <Input 
                     id="lastSchool" 
+                    required
                     value={formData.lastSchool}
                     onChange={e => setFormData({...formData, lastSchool: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
@@ -272,27 +286,30 @@ export default function SignupPage() {
               <h2 className="text-xl font-bold text-primary font-bold">4. Family Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="fatherName">Father&apos;s Name</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="fatherName">Father&apos;s Name *</Label>
                   <Input 
                     id="fatherName" 
+                    required
                     value={formData.fatherName}
                     onChange={e => setFormData({...formData, fatherName: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="motherName">Mother&apos;s Name</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="motherName">Mother&apos;s Name *</Label>
                   <Input 
                     id="motherName" 
+                    required
                     value={formData.motherName}
                     onChange={e => setFormData({...formData, motherName: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="parentContact">Parent&apos;s Contact Number</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="parentContact">Parent&apos;s Contact Number *</Label>
                   <Input 
                     id="parentContact" 
+                    required
                     value={formData.parentContact}
                     onChange={e => setFormData({...formData, parentContact: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
@@ -306,11 +323,12 @@ export default function SignupPage() {
               <h2 className="text-xl font-bold text-primary font-bold">5. Verification Documents</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="profileImage">Profile Photo</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="profileImage">Profile Photo *</Label>
                   <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative">
                     <input 
                       type="file" 
                       id="profileImage"
+                      required
                       accept="image/*"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={e => {
@@ -337,11 +355,12 @@ export default function SignupPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="idProofImage">ID Proof (Aadhaar/School ID)</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="idProofImage">ID Proof (Aadhaar/School ID) *</Label>
                   <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative">
                     <input 
                       type="file" 
                       id="idProofImage"
+                      required
                       accept="image/*,application/pdf"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={e => {
