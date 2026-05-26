@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
-import { ArrowLeft, UploadCloud, FileImage } from "lucide-react"
+import { ArrowLeft, UploadCloud, FileImage, FileText } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -38,7 +38,9 @@ export default function SignupPage() {
   })
 
   const [profileImage, setProfileImage] = useState<File | null>(null)
+  const [profilePreview, setProfilePreview] = useState<string>("")
   const [idProofImage, setIdProofImage] = useState<File | null>(null)
+  const [idProofPreview, setIdProofPreview] = useState<string>("")
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -324,25 +326,35 @@ export default function SignupPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="profileImage">Profile Photo *</Label>
-                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative">
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative flex flex-col items-center justify-center min-h-[160px]">
                     <input 
                       type="file" 
                       id="profileImage"
                       required
                       accept="image/*"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
-                          setProfileImage(e.target.files[0])
+                          const file = e.target.files[0]
+                          setProfileImage(file)
+                          setProfilePreview(URL.createObjectURL(file))
                         }
                       }}
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2 text-primary">
-                      {profileImage ? (
-                        <>
-                          <FileImage className="w-8 h-8 opacity-75" />
-                          <span className="text-sm font-medium">{profileImage.name}</span>
-                        </>
+                    <div className="flex flex-col items-center justify-center space-y-2 text-primary z-10">
+                      {profilePreview ? (
+                        <div className="flex flex-col items-center space-y-2">
+                          <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/40 shadow-md">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img 
+                              src={profilePreview} 
+                              alt="Profile Preview" 
+                              className="w-full h-full object-cover" 
+                            />
+                          </div>
+                          <span className="text-xs font-semibold text-muted-foreground max-w-[200px] truncate">{profileImage?.name}</span>
+                          <span className="text-xs font-bold text-primary hover:underline">Change Photo</span>
+                        </div>
                       ) : (
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
@@ -356,25 +368,43 @@ export default function SignupPage() {
                 
                 <div className="space-y-2">
                   <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="idProofImage">ID Proof (Aadhaar/School ID) *</Label>
-                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative">
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative flex flex-col items-center justify-center min-h-[160px]">
                     <input 
                       type="file" 
                       id="idProofImage"
                       required
                       accept="image/*,application/pdf"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
-                          setIdProofImage(e.target.files[0])
+                          const file = e.target.files[0]
+                          setIdProofImage(file)
+                          setIdProofPreview(URL.createObjectURL(file))
                         }
                       }}
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2 text-primary">
+                    <div className="flex flex-col items-center justify-center space-y-2 text-primary z-10 w-full">
                       {idProofImage ? (
-                        <>
-                          <FileImage className="w-8 h-8 opacity-75" />
-                          <span className="text-sm font-medium">{idProofImage.name}</span>
-                        </>
+                        <div className="flex flex-col items-center space-y-2 w-full">
+                          {idProofImage.type.startsWith("image/") && idProofPreview ? (
+                            <div className="relative w-40 h-24 rounded-lg overflow-hidden border-2 border-primary/40 shadow-md">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img 
+                                src={idProofPreview} 
+                                alt="ID Proof Preview" 
+                                className="w-full h-full object-cover" 
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center p-3 border rounded-xl bg-background shadow-sm max-w-[240px] w-full">
+                              <FileText className="w-10 h-10 text-rose-500 mb-1" />
+                              <span className="text-xs font-semibold text-foreground text-center truncate w-full px-2">{idProofImage.name}</span>
+                              <span className="text-[10px] text-muted-foreground uppercase mt-0.5 font-bold tracking-wider">PDF Document</span>
+                            </div>
+                          )}
+                          <span className="text-xs font-semibold text-muted-foreground max-w-[200px] truncate">{idProofImage.name}</span>
+                          <span className="text-xs font-bold text-primary hover:underline">Change Document</span>
+                        </div>
                       ) : (
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
