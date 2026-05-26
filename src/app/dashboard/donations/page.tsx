@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { AddDonationDialog } from "@/components/AddDonationDialog"
 import StudentDonationDialog from "@/components/StudentDonationDialog"
 import VerificationQueue from "@/components/VerificationQueue"
+import DonationPaymentProofViewer from "@/components/DonationPaymentProofViewer"
 import {
   Table,
   TableBody,
@@ -44,7 +45,20 @@ export default async function DonationsPage() {
   }
 
   const pendingDonations = donations.filter(d => d.status === "PENDING")
-  const historyDonations = (role === "STUDENT" || role === "ALUMNI") ? donations : donations.filter(d => d.status !== "PENDING")
+  // Students/Alumni see all their own donations (including pending & rejected)
+  // Admins/Volunteers see history (non-pending) donations
+  const historyDonations = (role === "STUDENT" || role === "ALUMNI") 
+    ? donations 
+    : donations.filter(d => d.status !== "PENDING")
+
+  const isAdminOrVolunteer = role === "MASTER_ADMIN" || role === "VOLUNTEER"
+
+  function getStatusBadge(status: string) {
+    if (status === "PAID") return { variant: "default" as const, className: "bg-emerald-500 hover:bg-emerald-600" }
+    if (status === "PENDING") return { variant: "secondary" as const, className: "bg-orange-400 hover:bg-orange-500 text-white" }
+    if (status === "REJECTED") return { variant: "destructive" as const, className: "bg-rose-500 hover:bg-rose-600" }
+    return { variant: "secondary" as const, className: "" }
+  }
 
   return (
     <div className="space-y-6">
@@ -53,7 +67,7 @@ export default async function DonationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Contributions</h1>
           <p className="text-muted-foreground mt-1">Manage and track federation donations.</p>
         </div>
-        {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && (
+        {isAdminOrVolunteer && (
           <AddDonationDialog students={students} />
         )}
         {(role === "STUDENT" || role === "ALUMNI") && (
@@ -61,7 +75,7 @@ export default async function DonationsPage() {
         )}
       </div>
 
-      {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && (
+      {isAdminOrVolunteer && (
         <VerificationQueue donations={pendingDonations} />
       )}
 
@@ -86,45 +100,53 @@ export default async function DonationsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              historyDonations.map((donation) => (
-                <TableRow key={donation.id}>
-                  <TableCell>
-                    <div className="font-medium">{donation.student.fullName}</div>
-                    <div className="text-xs text-muted-foreground font-mono">{donation.student.federationId}</div>
-                  </TableCell>
-                  <TableCell>
-                    {donation.startMonth}/{donation.startYear} 
-                    {donation.endMonth && (donation.startMonth !== donation.endMonth || donation.startYear !== donation.endYear) 
-                      ? ` - ${donation.endMonth}/${donation.endYear}` 
-                      : ''}
-                  </TableCell>
-                  <TableCell className="font-semibold text-emerald-600">₹{donation.amount}</TableCell>
-                  <TableCell>{donation.paymentMethod}</TableCell>
-                  <TableCell>{new Date(donation.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={donation.status === "PAID" ? "default" : donation.status === "PENDING" ? "secondary" : "destructive"} 
-                      className={donation.status === "PAID" ? "bg-emerald-500 hover:bg-emerald-600" : donation.status === "PENDING" ? "bg-orange-400 hover:bg-orange-500 text-white" : ""}>
-                      {donation.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {/* Placeholder for verify/receipt button */}
-                    {donation.status === "PAID" ? (
-                      donation.receipt ? (
-                        <a href={`/api/receipts/${donation.receipt.id}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-blue-600 hover:underline">
-                          View Receipt
-                        </a>
+              historyDonations.map((donation) => {
+                const { variant, className } = getStatusBadge(donation.status)
+                return (
+                  <TableRow key={donation.id}>
+                    <TableCell>
+                      <div className="font-medium">{donation.student.fullName}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{donation.student.federationId}</div>
+                    </TableCell>
+                    <TableCell>
+                      {donation.startMonth}/{donation.startYear} 
+                      {donation.endMonth && (donation.startMonth !== donation.endMonth || donation.startYear !== donation.endYear) 
+                        ? ` - ${donation.endMonth}/${donation.endYear}` 
+                        : ''}
+                    </TableCell>
+                    <TableCell className="font-semibold text-emerald-600">₹{donation.amount}</TableCell>
+                    <TableCell>{donation.paymentMethod}</TableCell>
+                    <TableCell>{new Date(donation.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={variant} className={className}>
+                        {donation.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {donation.status === "PAID" ? (
+                        donation.receipt ? (
+                          <a href={`/api/receipts/${donation.receipt.id}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-blue-600 hover:underline">
+                            View Receipt
+                          </a>
+                        ) : (
+                          <span className="text-xs font-medium text-emerald-600">Receipt Gen.</span>
+                        )
+                      ) : donation.status === "REJECTED" ? (
+                        <span className="text-xs font-medium text-rose-600">Rejected</span>
+                      ) : donation.status === "PENDING" ? (
+                        /* Show proof for students/alumni pending payments, and verify link for admins */
+                        donation.paymentProof ? (
+                          <DonationPaymentProofViewer proofUrl={donation.paymentProof} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Awaiting</span>
+                        )
                       ) : (
-                        <span className="text-xs font-medium text-emerald-600">Receipt Gen.</span>
-                      )
-                    ) : (role === "MASTER_ADMIN" || role === "VOLUNTEER") ? (
-                      <span className="text-xs font-medium text-blue-600 cursor-pointer hover:underline">Verify</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

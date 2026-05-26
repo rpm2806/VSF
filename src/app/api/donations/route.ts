@@ -164,6 +164,28 @@ export async function PATCH(req: Request) {
     const body = await req.json()
     const { donationId, action } = body
 
+    if (action === "REJECT") {
+      const { reason } = body
+      await db.donation.update({
+        where: { id: donationId },
+        data: {
+          status: "REJECTED",
+          verifiedById: session.user.id,
+          verifiedAt: new Date(),
+        }
+      })
+
+      await logActivity({
+        userId: session.user.id,
+        action: "DONATION_REJECTED",
+        entityType: "DONATION",
+        entityId: donationId,
+        details: `Rejected payment. Reason: ${reason || "Not specified"}`
+      })
+
+      return NextResponse.json({ success: true })
+    }
+
     if (action === "VERIFY") {
       const donation = await db.donation.update({
         where: { id: donationId },

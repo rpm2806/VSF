@@ -70,7 +70,7 @@ model Donation {
   endMonth      Int?      // 1-12
   startYear     Int?
   endYear       Int?
-  status        String    @default("PENDING") // "PENDING", "PAID", "OVERDUE", "PARTIAL"
+  status        String    @default("PENDING") // "PENDING", "PAID", "REJECTED", "OVERDUE", "PARTIAL"
   paymentMethod String?   // "CASH", "UPI", "BANK_TRANSFER"
   paymentProof  String?   // Cloudinary URL or Base64
   
