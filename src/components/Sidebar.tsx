@@ -11,7 +11,8 @@ import {
   Bell, 
   GraduationCap,
   Shield,
-  MessageCircle
+  MessageCircle,
+  Trash2
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -32,6 +33,7 @@ export default function Sidebar({ userRole, pendingQueries = 0 }: { userRole: st
     { name: "Announcements", href: "/dashboard/announcements", icon: Bell, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"], badge: 0 },
     { name: "Queries", href: "/dashboard/queries", icon: MessageCircle, roles: ["MASTER_ADMIN"], badge: pendingQueries },
     { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["MASTER_ADMIN", "STUDENT", "ALUMNI"], badge: 0 },
+    { name: "Recycle Bin", href: "/dashboard/recycle-bin", icon: Trash2, roles: ["MASTER_ADMIN"], badge: 0 },
   ].filter(item => item.roles.includes(userRole))
 
   return (

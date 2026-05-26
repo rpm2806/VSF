@@ -273,16 +273,18 @@ export async function DELETE(req: Request) {
     const { id } = await req.json()
     if (!id) return new NextResponse("Missing donation ID", { status: 400 })
 
-    // Delete receipt first (FK constraint)
-    await db.receipt.deleteMany({ where: { donationId: id } })
-    const donation = await db.donation.delete({ where: { id } })
+    // Soft delete
+    const donation = await db.donation.update({
+      where: { id },
+      data: { deletedAt: new Date() }
+    })
 
     await logActivity({
       userId: session.user.id,
       action: "DONATION_DELETED",
       entityType: "DONATION",
       entityId: id,
-      details: `Deleted Rs.${donation.amount} donation record (was ${donation.status})`
+      details: `Moved ₹${donation.amount} donation to recycle bin (was ${donation.status})`
     })
 
     return NextResponse.json({ success: true })
@@ -291,3 +293,4 @@ export async function DELETE(req: Request) {
     return new NextResponse("Internal Error", { status: 500 })
   }
 }
+

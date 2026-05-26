@@ -56,14 +56,18 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       return new NextResponse("Only Master Admin can delete expenses", { status: 403 })
     }
 
-    const expense = await db.expense.delete({ where: { id } })
+    // Soft delete
+    const expense = await db.expense.update({
+      where: { id },
+      data: { deletedAt: new Date() }
+    })
 
     await logActivity({
       userId: session.user.id,
       action: "EXPENSE_DELETED",
       entityType: "EXPENSE",
       entityId: id,
-      details: `Deleted expense: ${expense.title} (₹${expense.amount})`
+      details: `Moved expense to recycle bin: ${expense.title} (₹${expense.amount})`
     })
 
     return NextResponse.json({ success: true })

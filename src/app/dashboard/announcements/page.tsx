@@ -15,6 +15,7 @@ export default async function AnnouncementsPage() {
   const isMasterAdmin = role === "MASTER_ADMIN"
 
   const announcements = await db.announcement.findMany({
+    where: { deletedAt: null },
     orderBy: { createdAt: "desc" }
   })
 

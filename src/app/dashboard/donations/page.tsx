@@ -27,7 +27,7 @@ export default async function DonationsPage() {
   const whereCondition = (role === "STUDENT" || role === "ALUMNI") ? { studentId: session.user.id } : {}
 
   const donations = await db.donation.findMany({
-    where: whereCondition,
+    where: { ...whereCondition, deletedAt: null },
     include: {
       student: { select: { fullName: true, federationId: true } },
       receipt: { select: { id: true } },

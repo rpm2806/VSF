@@ -82,6 +82,8 @@ model Donation {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  deletedAt     DateTime?
+
   receipt       Receipt?
 }
 
@@ -110,6 +112,8 @@ model Expense {
   date          DateTime  @default(now())
   status        String    @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
   
+  deletedAt     DateTime?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -120,6 +124,8 @@ model Announcement {
   content       String
   targetRole    String    @default("ALL") // "ALL", "STUDENT", "VOLUNTEER"
   
+  deletedAt     DateTime?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

@@ -12,6 +12,7 @@ export default async function ExpensesPage() {
   }
 
   const expenses = await db.expense.findMany({
+    where: { deletedAt: null },
     orderBy: { date: "desc" }
   })
 

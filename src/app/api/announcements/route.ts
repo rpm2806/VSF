@@ -10,7 +10,9 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
+    // Everyone can fetch active announcements (exclude soft-deleted)
     const announcements = await db.announcement.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: "desc" }
     })
 
@@ -74,14 +76,18 @@ export async function DELETE(req: Request) {
     const { id } = await req.json()
     if (!id) return new NextResponse("Missing ID", { status: 400 })
 
-    const announcement = await db.announcement.delete({ where: { id } })
+    // Soft delete
+    const announcement = await db.announcement.update({
+      where: { id },
+      data: { deletedAt: new Date() }
+    })
 
     await logActivity({
       userId: session.user.id,
       action: "ANNOUNCEMENT_DELETED",
       entityType: "ANNOUNCEMENT",
       entityId: id,
-      details: `Deleted announcement: ${announcement.title}`
+      details: `Moved announcement to recycle bin: ${announcement.title}`
     })
 
     return NextResponse.json({ success: true })
