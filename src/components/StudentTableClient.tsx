@@ -17,12 +17,12 @@ import { ArrowUpDown, Search, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RenameBatchDialog } from "@/components/RenameBatchDialog"
-import { Check, X } from "lucide-react"
+import { Check, X, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function StudentTableClient({ students }: { students: any[] }) {
+export function StudentTableClient({ students, currentUserRole }: { students: any[], currentUserRole?: string }) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [batchFilter, setBatchFilter] = useState("ALL")
@@ -78,6 +78,25 @@ export function StudentTableClient({ students }: { students: any[] }) {
       router.refresh()
     } catch (_err) {
       toast.error("Something went wrong.")
+    }
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you absolutely sure you want to permanently delete student "${name}"?\nThis will also delete all their fee payments and receipt records.\nThis action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/students/${id}`, {
+        method: "DELETE"
+      })
+      
+      if (!res.ok) throw new Error("Failed to delete student")
+      
+      toast.success("Student deleted successfully!")
+      router.refresh()
+    } catch (_err) {
+      toast.error("Failed to delete student. Something went wrong.")
     }
   }
 
@@ -252,6 +271,18 @@ export function StudentTableClient({ students }: { students: any[] }) {
                       )}
                       <StudentProfileDialog student={student} />
                       {student.status !== "PENDING_APPROVAL" && <EditStudentDialog student={student} />}
+                      
+                      {currentUserRole === "MASTER_ADMIN" && (
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          title="Delete Student" 
+                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" 
+                          onClick={() => handleDelete(student.id, student.fullName)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

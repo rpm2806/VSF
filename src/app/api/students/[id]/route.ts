@@ -92,3 +92,44 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return new NextResponse("Internal Error", { status: 500 })
   }
 }
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (session.user as any).role
+    if (userRole !== "MASTER_ADMIN") {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    const resolvedParams = await params
+    const studentId = resolvedParams.id
+
+    // Cascade delete dependent records first
+    await db.receipt.deleteMany({ where: { studentId } })
+    await db.donation.deleteMany({ where: { studentId } })
+    
+    // Delete the student
+    const student = await db.student.delete({
+      where: { id: studentId }
+    })
+
+    // Log Activity
+    await logActivity({
+      userId: session.user.id,
+      action: "STUDENT_DELETED",
+      entityType: "STUDENT",
+      entityId: studentId,
+      details: `Admin deleted student: ${student.fullName} (${student.federationId})`
+    })
+
+    return NextResponse.json({ success: true, message: "Student deleted successfully" })
+  } catch (error) {
+    console.error("[STUDENT_DELETE]", error)
+    return new NextResponse("Internal Error", { status: 500 })
+  }
+}

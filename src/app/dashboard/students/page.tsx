@@ -51,7 +51,7 @@ export default async function StudentsPage() {
         <AddStudentDialog />
       </div>
 
-      <StudentTableClient students={students} />
+      <StudentTableClient students={students} currentUserRole={session.user.role} />
     </div>
   )
 }
