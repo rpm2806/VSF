@@ -6,6 +6,7 @@ import { sendReceiptEmail } from "@/lib/email"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { ReceiptPDF } from "@/components/ReceiptPDF"
 import React from "react"
+import { uploadBase64 } from "@/lib/cloudinary"
 
 export async function POST(req: Request) {
   try {
@@ -60,6 +61,15 @@ export async function POST(req: Request) {
     const isAdmin = userRole === "MASTER_ADMIN" || userRole === "VOLUNTEER"
     const status = isAdmin ? "PAID" : "PENDING"
     
+    let finalPaymentProof = paymentProof || null
+    if (paymentProof && paymentProof.startsWith("data:")) {
+      try {
+        finalPaymentProof = await uploadBase64(paymentProof, "vriksh_donations")
+      } catch (err) {
+        console.error("Failed to upload payment proof to Cloudinary:", err)
+      }
+    }
+
     const donation = await db.donation.create({
       data: {
         studentId,
@@ -70,7 +80,7 @@ export async function POST(req: Request) {
         endMonth: monthsCovered > 0 ? endMonth : null,
         endYear: monthsCovered > 0 ? endYear : null,
         paymentMethod,
-        paymentProof,
+        paymentProof: finalPaymentProof,
         status,
         verifiedById: isAdmin ? session.user.id : null,
         verifiedAt: isAdmin ? new Date() : null,
