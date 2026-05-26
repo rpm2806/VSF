@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Shield, ShieldOff, Key } from "lucide-react"
+import { Search, Shield, ShieldOff, Key, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import {
@@ -125,6 +125,23 @@ export function VolunteerTableClient({ volunteers }: { volunteers: any[] }) {
     }
   }
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you absolutely sure you want to permanently delete volunteer "${name}"?\nThis action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "DELETE"
+      })
+      if (!res.ok) throw new Error()
+      toast.success("Volunteer deleted successfully!")
+      router.refresh()
+    } catch {
+      toast.error("Failed to delete volunteer")
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-2 bg-background p-2 rounded-md border shadow-sm max-w-sm">
@@ -178,6 +195,14 @@ export function VolunteerTableClient({ volunteers }: { volunteers: any[] }) {
                       title={v.status === "ACTIVE" ? "Deactivate Volunteer" : "Reactivate Volunteer"}
                     >
                       {v.status === "ACTIVE" ? <ShieldOff className="h-4 w-4 text-rose-500" /> : <Shield className="h-4 w-4 text-emerald-500" />}
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDelete(v.id, v.name)}
+                      title="Delete Volunteer"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>

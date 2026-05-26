@@ -28,6 +28,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         )
 
         if (passwordsMatch) {
+          // Block inactive admins/volunteers from logging in
+          if (user.status !== "ACTIVE") {
+            return null
+          }
           return {
             id: user.id,
             email: user.email,
