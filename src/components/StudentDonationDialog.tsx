@@ -105,7 +105,7 @@ export default function StudentDonationDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 gap-2" />}>
         <QrCode className="w-4 h-4" />
-        Pay Federation Fee
+        Donate here
       </DialogTrigger>
       <DialogContent className="sm:max-w-[440px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
