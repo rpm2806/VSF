@@ -381,7 +381,7 @@ export default function SignupPage() {
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
                           <span className="text-sm font-medium">Click to upload photo</span>
-                          <span className="text-xs opacity-75">PNG, JPG or JPEG up to 5MB</span>
+                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 5MB)</span>
                         </>
                       )}
                     </div>
@@ -423,7 +423,7 @@ export default function SignupPage() {
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
                           <span className="text-sm font-medium">Click to upload ID photo</span>
-                          <span className="text-xs opacity-75">PNG, JPG or JPEG up to 5MB</span>
+                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 5MB)</span>
                         </>
                       )}
                     </div>
