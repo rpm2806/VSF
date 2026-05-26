@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { logActivity } from "@/lib/audit"
+import { sendApprovalEmail } from "@/lib/email"
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -72,10 +73,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (status !== undefined) updateData.status = status ? status.toUpperCase() : undefined
     if (role !== undefined) updateData.role = role ? role.toUpperCase() : undefined
 
+    const oldStudent = await db.student.findUnique({
+      where: { id: studentId }
+    })
+
     const student = await db.student.update({
       where: { id: studentId },
       data: updateData
     })
+
+    // If student is approved (transitioning from PENDING_APPROVAL to ACTIVE)
+    if (oldStudent && oldStudent.status === "PENDING_APPROVAL" && student.status === "ACTIVE" && student.email) {
+      try {
+        await sendApprovalEmail(student.email, student.fullName, student.federationId)
+      } catch (err) {
+        console.error("Failed to send approval email:", err)
+      }
+    }
 
     // Log Activity
     await logActivity({
