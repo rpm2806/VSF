@@ -123,26 +123,53 @@ export default async function DonationsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {donation.status === "PAID" ? (
-                        donation.receipt ? (
-                          <a href={`/api/receipts/${donation.receipt.id}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-blue-600 hover:underline">
-                            View Receipt
-                          </a>
+                      <div className="flex flex-col gap-1">
+                        {isAdminOrVolunteer ? (
+                          /* Admin/Volunteer: always show proof + receipt whenever they exist */
+                          <>
+                            {donation.receipt && (
+                              <a
+                                href={`/api/receipts/${donation.receipt.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium text-blue-600 hover:underline"
+                              >
+                                View Receipt
+                              </a>
+                            )}
+                            {donation.paymentProof && (
+                              <DonationPaymentProofViewer proofUrl={donation.paymentProof} />
+                            )}
+                            {!donation.receipt && !donation.paymentProof && (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </>
                         ) : (
-                          <span className="text-xs font-medium text-emerald-600">Receipt Gen.</span>
-                        )
-                      ) : donation.status === "REJECTED" ? (
-                        <span className="text-xs font-medium text-rose-600">Rejected</span>
-                      ) : donation.status === "PENDING" ? (
-                        /* Show proof for students/alumni pending payments, and verify link for admins */
-                        donation.paymentProof ? (
-                          <DonationPaymentProofViewer proofUrl={donation.paymentProof} />
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Awaiting</span>
-                        )
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
-                      )}
+                          /* Student/Alumni: status-based view */
+                          <>
+                            {donation.status === "PAID" ? (
+                              donation.receipt ? (
+                                <a
+                                  href={`/api/receipts/${donation.receipt.id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-medium text-blue-600 hover:underline"
+                                >
+                                  View Receipt
+                                </a>
+                              ) : (
+                                <span className="text-xs font-medium text-emerald-600">Receipt Gen.</span>
+                              )
+                            ) : donation.status === "REJECTED" ? (
+                              <span className="text-xs font-medium text-rose-600">Rejected</span>
+                            ) : donation.status === "PENDING" && donation.paymentProof ? (
+                              <DonationPaymentProofViewer proofUrl={donation.paymentProof} />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Awaiting</span>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 )
