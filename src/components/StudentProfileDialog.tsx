@@ -121,7 +121,7 @@ export function StudentProfileDialog({ student }: { student: any }) {
                 <GraduationCap className="w-4 h-4 text-muted-foreground mt-0.5" />
                 <div className="grid grid-cols-2 gap-4 w-full">
                   <div>
-                    <div className="font-medium text-foreground">Last School</div>
+                    <div className="font-medium text-foreground">Last School / College</div>
                     {student.lastSchool || "N/A"}
                   </div>
                   <div>

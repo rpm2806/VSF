@@ -70,7 +70,7 @@ export function StudentProfileSettingsForm({ student }: { student: any }) {
           <Input id="bloodGroup" name="bloodGroup" placeholder="e.g., O+" value={formData.bloodGroup} onChange={handleChange} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastSchool">Last School</Label>
+          <Label htmlFor="lastSchool">Last School / College</Label>
           <Input id="lastSchool" name="lastSchool" value={formData.lastSchool} onChange={handleChange} />
         </div>
 
