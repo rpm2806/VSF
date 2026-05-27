@@ -48,6 +48,9 @@ export async function POST(req: Request) {
 
     const saveFileToCloudinary = async (file: File | null, folder: string) => {
       if (!file || typeof file === "string" || file.size === 0) return null
+      if (file.size > 4 * 1024 * 1024) {
+        throw new Error("File size must be under 4MB.")
+      }
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
       return await uploadBuffer(buffer, folder)

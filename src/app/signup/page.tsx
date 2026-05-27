@@ -75,6 +75,17 @@ export default function SignupPage() {
       return
     }
 
+    if (profileImage.size > 4 * 1024 * 1024) {
+      toast.error("Profile Photo exceeds 4MB. Please upload a smaller image.")
+      setLoading(false)
+      return
+    }
+    if (idProofImage.size > 4 * 1024 * 1024) {
+      toast.error("ID Proof Photo exceeds 4MB. Please upload a smaller image.")
+      setLoading(false)
+      return
+    }
+
     try {
       const data = new FormData()
       Object.entries(formData).forEach(([key, value]) => {
@@ -358,6 +369,11 @@ export default function SignupPage() {
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
+                          if (file.size > 4 * 1024 * 1024) {
+                            toast.error("Profile photo exceeds 4MB. Please upload a smaller image.")
+                            e.target.value = ""
+                            return
+                          }
                           setProfileImage(file)
                           setProfilePreview(URL.createObjectURL(file))
                         }
@@ -381,7 +397,7 @@ export default function SignupPage() {
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
                           <span className="text-sm font-medium">Click to upload photo</span>
-                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 5MB)</span>
+                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 4MB)</span>
                         </>
                       )}
                     </div>
@@ -400,6 +416,11 @@ export default function SignupPage() {
                       onChange={e => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
+                          if (file.size > 4 * 1024 * 1024) {
+                            toast.error("ID proof photo exceeds 4MB. Please upload a smaller image.")
+                            e.target.value = ""
+                            return
+                          }
                           setIdProofImage(file)
                           setIdProofPreview(URL.createObjectURL(file))
                         }
@@ -423,7 +444,7 @@ export default function SignupPage() {
                         <>
                           <UploadCloud className="w-8 h-8 opacity-75" />
                           <span className="text-sm font-medium">Click to upload ID photo</span>
-                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 5MB)</span>
+                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 4MB)</span>
                         </>
                       )}
                     </div>

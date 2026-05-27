@@ -43,7 +43,7 @@ export function ReachOutDialog({ open, onClose }: Props) {
     setForm(f => ({ ...f, [key]: val }))
 
   const handleFile = (file: File) => {
-    const maxMB = 5
+    const maxMB = 4
     if (file.size > maxMB * 1024 * 1024) {
       toast.error(`File too large. Max ${maxMB}MB allowed.`)
       return
@@ -172,7 +172,7 @@ export function ReachOutDialog({ open, onClose }: Props) {
 
           {/* Attachment */}
           <div className="space-y-2">
-            <Label>Attachment <span className="text-muted-foreground text-xs">(Photo or PDF, max 5MB — optional)</span></Label>
+            <Label>Attachment <span className="text-muted-foreground text-xs">(Photo or PDF, max 4MB — optional)</span></Label>
             {!attachment ? (
               <div
                 className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors

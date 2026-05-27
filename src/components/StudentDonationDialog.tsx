@@ -34,8 +34,8 @@ export default function StudentDonationDialog() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size must be less than 5MB")
+      if (file.size > 4 * 1024 * 1024) {
+        toast.error("File size must be less than 4MB")
         return
       }
       const reader = new FileReader()
@@ -280,7 +280,7 @@ export default function StudentDonationDialog() {
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-medium text-foreground">Tap to upload screenshot</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, JPEG up to 5MB</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, JPEG up to 4MB</p>
                   </div>
                 </button>
               )}
