@@ -205,6 +205,16 @@ export function EditStudentDialog({ student }: { student: any }) {
                 onChange={e => setFormData({...formData, dob: e.target.value})}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="joiningYear">Joining Year *</Label>
+              <Input 
+                id="joiningYear" 
+                type="number"
+                required
+                value={formData.joiningYear}
+                onChange={e => setFormData({...formData, joiningYear: e.target.value})}
+              />
+            </div>
           </div>
 
           <div className="border-t pt-4 grid grid-cols-2 gap-4">
