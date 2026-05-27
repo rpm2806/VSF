@@ -1,154 +1,141 @@
-# 🌿 Vriksh Students Federation — Portal
+# 🌿 Vriksh Students Federation (VSF) Portal
 
-**Official management portal for Vriksh Students Federation (VSF)**  
-*"By the Students, For the Students, Of the Students"*
+[![Next.js](https://img.shields.io/badge/Next.js-15%2B-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5%2B-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-teal?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue?style=for-the-badge&logo=postgresql)](https://neon.tech/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 
----
+An enterprise-grade, secure, full-stack student management and donation verification portal developed for the **Vriksh Students Federation**. This system digitizes organization directories, secures personal identification documents, automates transactional accounting ledger workflows, and triggers customized real-time email alerts.
 
-## 📖 About the Project
-
-VRIKSH STUDENTS FEDERATION is a student-driven initiative dedicated to supporting students through unity, contribution, and collective growth. This portal is the official digital platform for managing:
-
-- Monthly student donations & contribution tracking
-- Donation receipt generation (PDF)
-- Student & alumni records management
-- Expense tracking with admin approval
-- Announcements for members
-- Student queries & support requests
-- Volunteer & admin management
-
-**Launched:** 5 September 2021  
-**Monthly Contribution:** ₹30/month per student  
-**Tech Stack:** Next.js 16, Prisma ORM, SQLite, Tailwind CSS, NextAuth.js
+🌐 **Live Production Link:** [https://vriksh-sf.vercel.app](https://vriksh-sf.vercel.app)
 
 ---
 
-## 👥 User Roles
+## 🏗️ System Architecture
 
-| Role | Access |
-|------|--------|
-| **Master Admin** | Full access — students, donations, expenses, volunteers, queries, settings |
-| **Volunteer** | View/manage students, record donations |
-| **Student / Alumni** | View own donations, download receipts, update profile |
+```mermaid
+graph TD
+    Client[Browser Client / React 19] -->|HTTPS Requests| NextAPI[Next.js Serverless API Routes]
+    NextAPI -->|Authentication Middleware| NextAuth[NextAuth.js v5 - RBAC]
+    NextAPI -->|Type-Safe Queries| Prisma[Prisma Client ORM]
+    Prisma -->|Pooled Connections| Neon[Neon Serverless PostgreSQL]
+    NextAPI -->|SMTP Protocol| Nodemailer[Nodemailer / Gmail SMTP]
+    NextAPI -->|Secure Image Proxy / REST| Cloudinary[Cloudinary Private Secure Bucket]
+    
+    subgraph Client Panel
+        UI[Tailwind CSS & shadcn/ui]
+        Framer[Framer Motion Animations]
+        Excel[Client-Side XML Excel Generator]
+    end
+```
 
 ---
 
-## 🚀 Running on Any System
+## 🌟 Key Capabilities & Features
 
-### Step 1 — Install Node.js (One-time)
-Download and install **Node.js LTS** from:  
-👉 https://nodejs.org
+### 🔒 Secure Document Verification Pipeline
+* **Cloudinary Private Storage**: Fully integrates with Cloudinary using a secure, private bucket directory for sensitive items (e.g. Aadhaar cards, profile pictures).
+* **Next.js Secure Image Proxy Route (`/api/secure-image`)**: Implemented a server-side authentication check. Images are never directly public; they are fetched as binary buffers from Cloudinary by the server and streamed back only to authenticated admins.
 
-Verify installation:
+### 📧 Automated Transactional Email Engine
+* **Student Approved Welcome**: Approval of a pending student profile automatically triggers an email containing their dynamically generated, unique `Federation ID` and secure portal access details.
+* **Verifications & Dynamic PDF Receipts**: Admin approval of a payment automatically compiles a styled transactional receipt, renders it to a secure PDF buffer, and emails it directly as an attachment to the student's Gmail account using Gmail SMTP.
+
+### 📊 Branded Excel Directory Exports
+* **Excel Workbook Generation**: Replaced standard raw CSV exports with a high-fidelity XML-based Excel workbook (`.xls`) styled in VSF's emerald green corporate design.
+* **Precise Formatting**: Correctly handles formatting to prevent Excel from removing leading zeros in key digits like Aadhaar Numbers and Phone Numbers.
+
+### 🛡️ Data Normalization & Integrity
+* **Enforced Uppercasing**: Integrated global string capitalization filters in database controllers and client forms, standardizing historical records and ensuring consistent database entries.
+* **Soft-Delete Architecture**: Outfitted the data models with `deletedAt` timestamps, enabling system recycle-bins for secure recovery and preventing hard-deletion of transaction records.
+
+---
+
+## 🔑 Role-Based Access Control (RBAC) Matrix
+
+| Feature / Page | Master Admin | Volunteer | Student / Alumni |
+| :--- | :---: | :---: | :---: |
+| **View Own Dashboard & Fee Receipts** | ✅ | ✅ | ✅ |
+| **Manage Profile Settings & Add Donations** | ✅ | ✅ | ✅ |
+| **Manage Student Directories** | ✅ | ✅ | ❌ |
+| **Verify Fee Receipts & Generate PDF Invoices** | ✅ | ✅ | ❌ |
+| **Manage Volunteers & Master Expenses** | ✅ | ❌ | ❌ |
+| **Access System Settings & Recycle Bins** | ✅ | ❌ | ❌ |
+
+---
+
+## ⚙️ Environment Configuration Template
+
+To run this application locally or deploy it to Vercel, create a `.env` file in the root folder with the following variables:
+
+```env
+# ─── DATABASE (Neon PostgreSQL) ───
+DATABASE_URL="postgresql://user:pass@host-pooler.neon.tech/db?sslmode=require&pgbouncer=true"
+DIRECT_URL="postgresql://user:pass@host.neon.tech/db?sslmode=require"
+
+# ─── SECURITY & NEXTAUTH ───
+AUTH_SECRET="your-32-character-auth-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# ─── CLOUDINARY CLOUD STORAGE ───
+CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
+CLOUDINARY_API_KEY="your-cloudinary-api-key"
+CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
+
+# ─── TRANSACTIONAL GMAIL SMTP ───
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-16-character-google-app-password"
+SMTP_FROM='"Vriksh Students Federation" <your-email@gmail.com>'
+```
+
+---
+
+## 🛠️ Step-by-Step Installation & Local Run Guide
+
+Follow these steps to run the VSF portal locally on your system:
+
+### 1. Prerequisite Setup
+Ensure that you have **Node.js LTS (v20+)** installed on your system. Verify with:
 ```bash
 node -v
 npm -v
 ```
 
----
+### 2. Clone the Repository & Install Packages
+```bash
+# Clone the repository
+git clone https://github.com/rpm2806/VSF.git
+cd VSF
 
-### Step 2 — Copy the Project Folder
-Copy the entire project folder (`VrikshSF` or `VSFederation`) to your system.
-
-> ✅ Make sure to include the `prisma/dev.db` file — it contains all your data.  
-> ❌ You do NOT need to copy `node_modules` or `.next` — they will be regenerated.
-
----
-
-### Step 3 — Create the `.env` File
-In the **root of the project folder**, create a file named `.env` with the following content:
-
-```env
-DATABASE_URL="file:./dev.db"
-AUTH_SECRET="vriksh-sf-super-secret-key-1234567890"
-NEXTAUTH_URL="http://localhost:3000"
+# Install dependencies
+npm install
 ```
 
----
-
-### Step 4 — Run These Commands (in order)
-
-Open **Command Prompt** or **PowerShell** inside the project folder:
-
+### 3. Sync Your Database Models
+Ensure your `.env` is loaded with your Neon PG URLs, then run Prisma to sync your schemas:
 ```bash
-# Install all dependencies
-npm install
-
-# Set up the database (only needed once, or when DB is missing)
 npx prisma db push
+```
 
-# Start the development server
+### 4. Run the Development Server
+```bash
 npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000) inside your web browser!
 
-Then open your browser and go to:  
-👉 **http://localhost:3000**
-
----
-
-### Step 5 — Production Build (Optional)
-
-If you want to run in production mode (faster):
-
+### 5. Production Compilation
+To verify build readiness or compile for production:
 ```bash
-# Build the app
 npm run build
-
-# Start production server
 npm run start
 ```
 
 ---
 
-## 🔐 Default Admin Login
-
-| Field | Value |
-|-------|-------|
-| Email | `admin@vrikshsf.org` |
-| Password | *(set during first seed — ask your admin)* |
-
-> ⚠️ Change the admin password after first login from **Settings → Change Password**
-
----
-
-## 📁 Project Structure
-
-```
-VrikshSF/
-├── prisma/
-│   ├── schema.prisma     # Database schema
-│   └── dev.db            # SQLite database (your data lives here)
-├── public/
-│   ├── logo.png          # VSF official logo
-│   └── uploads/          # Student profile & ID proof images
-├── src/
-│   ├── app/              # Next.js pages & API routes
-│   ├── components/       # Reusable UI components
-│   └── lib/              # Utilities (db, auth, email)
-├── .env                  # Environment variables (create manually)
-├── .env.example          # Template for .env
-└── README.md             # This file
-```
-
----
-
-## 🛠️ Common Commands
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server (localhost:3000) |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npx prisma db push` | Sync database schema |
-| `npx prisma studio` | Open visual database browser |
-
----
-
-## 📞 Support & Contact
-
-For technical issues or questions about the portal, contact the **VSF Admin Team** through the federation portal or reach out directly to your volunteer team.
-
----
-
-*© 2021–present Vriksh Pathshala. All rights reserved.*  
-*Together We Grow. Together We Support. 🌱*
+## ⚖️ License & Copyright
+Developed by **Rupam Kumar** for the Vriksh Students Federation. All rights reserved.  
+*Together We Grow. Together We Support.* 🌱
