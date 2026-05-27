@@ -297,6 +297,7 @@ export function EditStudentDialog({ student }: { student: any }) {
                   <SelectItem value="ACTIVE">Active</SelectItem>
                   <SelectItem value="ALUMNI">Alumni</SelectItem>
                   <SelectItem value="INACTIVE">Inactive</SelectItem>
+                  <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
                 </SelectContent>
               </Select>
             </div>
