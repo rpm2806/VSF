@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { uploadBuffer } from "@/lib/cloudinary"
+import { generateLowestUnusedFederationId } from "@/lib/id-generator"
 
 export async function POST(req: Request) {
   try {
@@ -55,30 +56,9 @@ export async function POST(req: Request) {
     const profileImage = await saveFileToCloudinary(profileImageFile, "vriksh_students")
     const idProofImage = await saveFileToCloudinary(idProofImageFile, "vriksh_ids")
 
-    // Generate VSF ID
-    const yearCount = await db.student.count({
-      where: { joiningYear: parseInt(joiningYear || new Date().getFullYear().toString()) }
-    })
-
-    const formatSetting = await db.systemSetting.findUnique({
-      where: { key: "federationIdFormat" }
-    })
-    const formatString = formatSetting?.value || "VSF{YY}{000}"
-
+    // Generate VSF ID using gap-filling allocation
     const jYear = parseInt(joiningYear || new Date().getFullYear().toString())
-    const yy = String(jYear).slice(-2)
-    const yyyy = String(jYear)
-
-    let federationId = formatString.replace(/{YY}/g, yy).replace(/{YYYY}/g, yyyy)
-
-    const paddingMatch = federationId.match(/\{0+\}/)
-    if (paddingMatch) {
-      const paddingLength = paddingMatch[0].length - 2 // remove { and }
-      const countPadded = String(yearCount + 1).padStart(paddingLength, '0')
-      federationId = federationId.replace(paddingMatch[0], countPadded)
-    } else {
-      federationId += String(yearCount + 1)
-    }
+    const federationId = await generateLowestUnusedFederationId(jYear)
 
     const student = await db.student.create({
       data: {

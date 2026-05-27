@@ -85,3 +85,49 @@ export async function POST(req: Request) {
   }
 }
 
+export async function DELETE(req: Request) {
+  try {
+    const session = await auth()
+    if (!session?.user) return new NextResponse("Unauthorized", { status: 401 })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userRole = (session.user as any).role
+    if (userRole !== "MASTER_ADMIN") return new NextResponse("Forbidden", { status: 403 })
+
+    const { type, id } = await req.json()
+    if (!type || !id) return new NextResponse("Missing type or id", { status: 400 })
+
+    if (type === "student") {
+      // 1. Delete dependent receipts
+      await db.receipt.deleteMany({ where: { studentId: id } })
+      // 2. Delete dependent donations
+      await db.donation.deleteMany({ where: { studentId: id } })
+      // 3. Delete the student
+      await db.student.delete({ where: { id } })
+    } else if (type === "donation") {
+      // Delete associated receipts first
+      await db.receipt.deleteMany({ where: { donationId: id } })
+      // Delete the donation
+      await db.donation.delete({ where: { id } })
+    } else if (type === "expense") {
+      await db.expense.delete({ where: { id } })
+    } else if (type === "announcement") {
+      await db.announcement.delete({ where: { id } })
+    } else {
+      return new NextResponse("Invalid type", { status: 400 })
+    }
+
+    await logActivity({
+      userId: session.user.id,
+      action: "ITEM_PERMANENTLY_DELETED",
+      entityType: type.toUpperCase(),
+      entityId: id,
+      details: `Permanently deleted ${type} from recycle bin`
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("[RECYCLE_BIN_DELETE]", error)
+    return new NextResponse("Internal Error", { status: 500 })
+  }
+}
+

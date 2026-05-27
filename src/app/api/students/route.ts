@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { logActivity } from "@/lib/audit"
+import { generateLowestUnusedFederationId } from "@/lib/id-generator"
 
 export async function POST(req: Request) {
   try {
@@ -36,29 +37,8 @@ export async function POST(req: Request) {
       workingAt
     } = body
 
-    // Generate VSF ID
-    const yearCount = await db.student.count({
-      where: { joiningYear: parseInt(joiningYear) }
-    })
-
-    const formatSetting = await db.systemSetting.findUnique({
-      where: { key: "federationIdFormat" }
-    })
-    const formatString = formatSetting?.value || "VSF{YY}{000}"
-
-    const yy = String(joiningYear).slice(-2)
-    const yyyy = String(joiningYear)
-
-    let federationId = formatString.replace(/{YY}/g, yy).replace(/{YYYY}/g, yyyy)
-
-    const paddingMatch = federationId.match(/\{0+\}/)
-    if (paddingMatch) {
-      const paddingLength = paddingMatch[0].length - 2 // remove { and }
-      const countPadded = String(yearCount + 1).padStart(paddingLength, '0')
-      federationId = federationId.replace(paddingMatch[0], countPadded)
-    } else {
-      federationId += String(yearCount + 1)
-    }
+    // Generate VSF ID using gap-filling allocation
+    const federationId = await generateLowestUnusedFederationId(parseInt(joiningYear))
 
     const student = await db.student.create({
       data: {

@@ -121,6 +121,27 @@ export default function RecycleBinClient() {
     }
   }
 
+  const deleteItem = async (type: string, id: string, name: string) => {
+    if (!confirm(`Are you absolutely sure you want to permanently delete "${name}"?\nThis action CANNOT be undone and will delete all associated records!`)) {
+      return
+    }
+    setActionId(id)
+    try {
+      const res = await fetch("/api/recycle-bin", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, id })
+      })
+      if (!res.ok) throw new Error("Failed to delete")
+      toast.success("Item permanently deleted successfully")
+      fetchData()
+    } catch {
+      toast.error("Could not permanently delete item")
+    } finally {
+      setActionId(null)
+    }
+  }
+
   const total = students.length + donations.length + expenses.length + announcements.length
 
   const tabs = [
@@ -229,6 +250,10 @@ export default function RecycleBinClient() {
                   disabled={actionId === d.id} onClick={() => restore("donation", d.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
                 </Button>
+                <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:border-rose-300 border-rose-200"
+                  disabled={actionId === d.id} onClick={() => deleteItem("donation", d.id, `Payment of ₹${d.amount} for ${d.student.fullName}`)}>
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </Button>
               </div>
             </div>
           ))}
@@ -267,6 +292,10 @@ export default function RecycleBinClient() {
                   disabled={actionId === e.id} onClick={() => restore("expense", e.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
                 </Button>
+                <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:border-rose-300 border-rose-200"
+                  disabled={actionId === e.id} onClick={() => deleteItem("expense", e.id, `Expense: ${e.title}`)}>
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </Button>
               </div>
             </div>
           ))}
@@ -295,6 +324,10 @@ export default function RecycleBinClient() {
                 <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300"
                   disabled={actionId === a.id} onClick={() => restore("announcement", a.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:border-rose-300 border-rose-200"
+                  disabled={actionId === a.id} onClick={() => deleteItem("announcement", a.id, `Announcement: ${a.title}`)}>
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
                 </Button>
               </div>
             </div>
@@ -330,6 +363,10 @@ export default function RecycleBinClient() {
                 <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300"
                   disabled={actionId === s.id} onClick={() => restore("student", s.id)}>
                   <RotateCcw className="w-3.5 h-3.5" /> Restore
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:border-rose-300 border-rose-200"
+                  disabled={actionId === s.id} onClick={() => deleteItem("student", s.id, `Student: ${s.fullName} (${s.federationId})`)}>
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
                 </Button>
               </div>
             </div>
