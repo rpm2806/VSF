@@ -25,18 +25,13 @@ import {
 } from "@/components/ui/select"
 
 
-export const STANDARD_BATCHES = [
-  "2020-2021", "2021-2022", "2022-2023", "2023-2024", 
-  "2024-2025", "2025-2026", "2026-2027", "2027-2028", "2028-2029", "2029-2030"
-]
-
-export function AddStudentDialog({ initialBatch }: { initialBatch?: string }) {
+export function AddStudentDialog({ initialBatch, existingBatches = [] }: { initialBatch?: string; existingBatches?: string[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isCustomBatch, setIsCustomBatch] = useState(false)
 
-  const allBatches = Array.from(new Set([...STANDARD_BATCHES, initialBatch].filter(Boolean))) as string[]
+  const allBatches = Array.from(new Set([...existingBatches, initialBatch].filter(Boolean))).sort() as string[]
   
   const [formData, setFormData] = useState({
     fullName: "",

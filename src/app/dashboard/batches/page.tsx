@@ -43,6 +43,8 @@ export default async function BatchesPage() {
 
 
 
+  const existingBatches = Array.from(new Set(dbStudents.map(s => s.batch).filter(Boolean))).sort() as string[]
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -50,7 +52,7 @@ export default async function BatchesPage() {
           <h1 className="text-3xl font-bold tracking-tight">Batches</h1>
           <p className="text-muted-foreground mt-1">Manage and view students organized by their academic batch.</p>
         </div>
-        <AddStudentDialog />
+        <AddStudentDialog existingBatches={existingBatches} />
       </div>
 
       <StudentTableClient students={students} />

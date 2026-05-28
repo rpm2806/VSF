@@ -359,7 +359,7 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
                         </>
                       )}
                       <StudentProfileDialog student={student} />
-                      {student.status !== "PENDING_APPROVAL" && <EditStudentDialog student={student} />}
+                      {student.status !== "PENDING_APPROVAL" && <EditStudentDialog student={student} existingBatches={uniqueBatches} />}
                       
                       {currentUserRole === "MASTER_ADMIN" && (
                         <Button 

@@ -17,16 +17,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { STANDARD_BATCHES } from "@/components/AddStudentDialog"
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function EditStudentDialog({ student }: { student: any }) {
+export function EditStudentDialog({ student, existingBatches = [] }: { student: any; existingBatches?: string[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isCustomBatch, setIsCustomBatch] = useState(false)
   
-  const allBatches = Array.from(new Set([...STANDARD_BATCHES, student.batch].filter(Boolean)))
+  const allBatches = Array.from(new Set([...existingBatches, student.batch].filter(Boolean))).sort() as string[]
   
   const [formData, setFormData] = useState({
     fullName: student.fullName || "",

@@ -42,6 +42,8 @@ export default async function StudentsPage() {
     return { ...student, pendingDues, advanceBalance }
   })
 
+  const existingBatches = Array.from(new Set(dbStudents.map(s => s.batch).filter(Boolean))).sort() as string[]
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -49,7 +51,7 @@ export default async function StudentsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Students & Alumni</h1>
           <p className="text-muted-foreground mt-1">Manage federation members and records.</p>
         </div>
-        <AddStudentDialog />
+        <AddStudentDialog existingBatches={existingBatches} />
       </div>
 
       <StudentTableClient students={students} currentUserRole={session.user.role} />
