@@ -16,11 +16,10 @@ export async function generateLowestUnusedFederationId(joiningYear: number): Pro
 
   const template = formatString.replace(/{YY}/g, yy).replace(/{YYYY}/g, yyyy)
 
-  // Fetch all existing federationId values for students who joined in this year
-  // We query all records, including active and soft-deleted (recycled) ones,
-  // to prevent reclaiming an ID of an item in the Recycle Bin that might be restored later.
+  // Fetch all existing federationId values across the entire database.
+  // This is completely foolproof and prevents unique constraint crashes even if
+  // a student's joining year was manually edited but their original ID remained.
   const existingStudents = await db.student.findMany({
-    where: { joiningYear },
     select: { federationId: true }
   })
 
