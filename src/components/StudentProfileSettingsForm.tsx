@@ -34,6 +34,13 @@ export function StudentProfileSettingsForm({ student }: { student: any }) {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
+    if (!formData.bloodGroup.trim()) {
+      toast.error("Please enter your Blood Group.")
+      setLoading(false)
+      return
+    }
+
     try {
       // Convert all text values to uppercase
       const uppercaseData: any = { ...formData }
@@ -160,8 +167,8 @@ export function StudentProfileSettingsForm({ student }: { student: any }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bloodGroup">Blood Group</Label>
-            <Input id="bloodGroup" name="bloodGroup" placeholder="e.g., O+" value={formData.bloodGroup} onChange={handleChange} />
+            <Label htmlFor="bloodGroup">Blood Group *</Label>
+            <Input id="bloodGroup" name="bloodGroup" placeholder="e.g., O+" value={formData.bloodGroup} onChange={handleChange} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastSchool">Current/Last - School/College</Label>

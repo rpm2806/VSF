@@ -56,6 +56,12 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
     e.preventDefault()
     setLoading(true)
 
+    if (!formData.bloodGroup.trim()) {
+      toast.error("Please enter Blood Group.")
+      setLoading(false)
+      return
+    }
+
     try {
       // Convert all text values to uppercase
       const uppercaseData: any = { ...formData }
@@ -186,9 +192,10 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bloodGroup">Blood Group</Label>
+              <Label htmlFor="bloodGroup">Blood Group *</Label>
               <Input 
                 id="bloodGroup" 
+                required
                 placeholder="e.g. O+"
                 value={formData.bloodGroup}
                 onChange={e => setFormData({...formData, bloodGroup: e.target.value})}

@@ -47,6 +47,12 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
 
+    if (!formData.bloodGroup.trim()) {
+      toast.error("Please enter your Blood Group.")
+      setLoading(false)
+      return
+    }
+
     if (!profileImage) {
       toast.error("Please upload your Profile Photo.")
       setLoading(false)
@@ -246,9 +252,10 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="bloodGroup">Blood Group</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="bloodGroup">Blood Group *</Label>
                   <Input 
                     id="bloodGroup" 
+                    required
                     placeholder="e.g. O+"
                     value={formData.bloodGroup}
                     onChange={e => setFormData({...formData, bloodGroup: e.target.value})}
