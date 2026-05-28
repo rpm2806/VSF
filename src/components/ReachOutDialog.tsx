@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Upload, X, FileText, ImageIcon, Loader2, Send, MessageSquareHeart } from "lucide-react"
+import { compressImage } from "@/lib/image-compressor"
 
 interface Props {
   open: boolean
@@ -42,17 +43,30 @@ export function ReachOutDialog({ open, onClose }: Props) {
   const handleField = (key: string, val: string) =>
     setForm(f => ({ ...f, [key]: val }))
 
-  const handleFile = (file: File) => {
-    const maxMB = 4
-    if (file.size > maxMB * 1024 * 1024) {
-      toast.error(`File too large. Max ${maxMB}MB allowed.`)
-      return
+  const handleFile = async (file: File) => {
+    let finalFile = file
+    if (file.type.startsWith("image/")) {
+      const toastId = toast.loading("Processing image...")
+      try {
+        finalFile = await compressImage(file)
+        toast.success("Image optimized successfully!", { id: toastId })
+      } catch (err) {
+        toast.error("Failed to process image.", { id: toastId })
+        return
+      }
+    } else {
+      const maxMB = 4
+      if (file.size > maxMB * 1024 * 1024) {
+        toast.error(`File too large. Max ${maxMB}MB allowed.`)
+        return
+      }
     }
+
     const reader = new FileReader()
     reader.onload = e => {
-      setAttachment({ name: file.name, base64: e.target?.result as string, type: file.type })
+      setAttachment({ name: finalFile.name, base64: e.target?.result as string, type: finalFile.type })
     }
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(finalFile)
   }
 
   const handleDrop = (e: React.DragEvent) => {

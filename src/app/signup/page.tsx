@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { compressImage } from "@/lib/image-compressor"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -373,16 +374,18 @@ export default function SignupPage() {
                       required
                       accept="image/png, image/jpeg, image/jpg"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                      onChange={e => {
+                      onChange={async (e) => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
-                          if (file.size > 4 * 1024 * 1024) {
-                            toast.error("Profile photo exceeds 4MB. Please upload a smaller image.")
-                            e.target.value = ""
-                            return
+                          const toastId = toast.loading("Processing profile photo...")
+                          try {
+                            const optimized = await compressImage(file)
+                            setProfileImage(optimized)
+                            setProfilePreview(URL.createObjectURL(optimized))
+                            toast.success("Profile photo optimized successfully!", { id: toastId })
+                          } catch (err) {
+                            toast.error("Failed to process image.", { id: toastId })
                           }
-                          setProfileImage(file)
-                          setProfilePreview(URL.createObjectURL(file))
                         }
                       }}
                     />
@@ -420,16 +423,18 @@ export default function SignupPage() {
                       required
                       accept="image/png, image/jpeg, image/jpg"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                      onChange={e => {
+                      onChange={async (e) => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
-                          if (file.size > 4 * 1024 * 1024) {
-                            toast.error("ID proof photo exceeds 4MB. Please upload a smaller image.")
-                            e.target.value = ""
-                            return
+                          const toastId = toast.loading("Processing ID proof...")
+                          try {
+                            const optimized = await compressImage(file)
+                            setIdProofImage(optimized)
+                            setIdProofPreview(URL.createObjectURL(optimized))
+                            toast.success("ID proof optimized successfully!", { id: toastId })
+                          } catch (err) {
+                            toast.error("Failed to process image.", { id: toastId })
                           }
-                          setIdProofImage(file)
-                          setIdProofPreview(URL.createObjectURL(file))
                         }
                       }}
                     />

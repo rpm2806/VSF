@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import Image from "next/image"
 import { QrCode, Upload, CheckCircle2, X, Banknote, Smartphone } from "lucide-react"
+import { compressImage } from "@/lib/image-compressor"
 
 import {
   Dialog,
@@ -31,20 +32,23 @@ export default function StudentDonationDialog() {
   const [paymentProof, setPaymentProof] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      if (file.size > 4 * 1024 * 1024) {
-        toast.error("File size must be less than 4MB")
-        return
+      const toastId = toast.loading("Processing screenshot...")
+      try {
+        const optimized = await compressImage(file)
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const result = reader.result as string
+          setPaymentProof(result)
+          setPreviewUrl(result)
+          toast.success("Screenshot optimized successfully!", { id: toastId })
+        }
+        reader.readAsDataURL(optimized)
+      } catch (err) {
+        toast.error("Failed to process image.", { id: toastId })
       }
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const result = reader.result as string
-        setPaymentProof(result)
-        setPreviewUrl(result)
-      }
-      reader.readAsDataURL(file)
     }
   }
 
