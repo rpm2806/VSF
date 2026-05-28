@@ -254,7 +254,6 @@ export default function StudentDonationDialog() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFileChange}
                 className="hidden"
                 id="payment-proof-input"
