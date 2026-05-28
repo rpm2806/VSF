@@ -31,15 +31,15 @@ export default function Topbar({ user }: { user: any }) {
   const userRole = user?.role || "STUDENT"
 
   const navItems = [
-    { name: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"] },
+    { name: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI", "OTHER"] },
     { name: "Students & Alumni", href: "/dashboard/students", icon: GraduationCap, roles: ["MASTER_ADMIN", "VOLUNTEER"] },
     { name: "Batches", href: "/dashboard/batches", icon: Users, roles: ["MASTER_ADMIN", "VOLUNTEER"] },
     { name: "Volunteers", href: "/dashboard/volunteers", icon: Shield, roles: ["MASTER_ADMIN"] },
-    { name: "Donations", href: "/dashboard/donations", icon: HeartHandshake, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"] },
+    { name: "Donations", href: "/dashboard/donations", icon: HeartHandshake, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI", "OTHER"] },
     { name: "Expenses", href: "/dashboard/expenses", icon: Receipt, roles: ["MASTER_ADMIN"] },
-    { name: "Announcements", href: "/dashboard/announcements", icon: Bell, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI"] },
+    { name: "Announcements", href: "/dashboard/announcements", icon: Bell, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI", "OTHER"] },
     { name: "Queries", href: "/dashboard/queries", icon: MessageCircle, roles: ["MASTER_ADMIN"] },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["MASTER_ADMIN", "STUDENT", "ALUMNI"] },
+    { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["MASTER_ADMIN", "STUDENT", "ALUMNI", "OTHER"] },
   ].filter(item => item.roles.includes(userRole))
 
   return (

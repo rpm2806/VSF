@@ -96,12 +96,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   events: {
     async signIn(message) {
       if (message.user) {
+        const isStudent = ["STUDENT", "ALUMNI", "OTHER"].includes(message.user.role || "")
         await logActivity({
-          userId: message.user.role === 'STUDENT' ? null : message.user.id,
+          userId: isStudent ? null : message.user.id,
           action: "USER_LOGIN",
-          entityType: message.user.role === 'STUDENT' ? "STUDENT" : "USER",
+          entityType: isStudent ? "STUDENT" : "USER",
           entityId: message.user.id as string,
-          details: `${message.user.role === 'STUDENT' ? 'Student' : 'Admin/Volunteer'} logged in: ${message.user.name}`
+          details: `${isStudent ? "Student/Member" : "Admin/Volunteer"} logged in: ${message.user.name}`
         })
       }
     }

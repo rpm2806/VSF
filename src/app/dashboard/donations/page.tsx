@@ -24,7 +24,7 @@ export default async function DonationsPage() {
   const role = session.user.role as string
 
   // Query conditions based on role
-  const whereCondition = (role === "STUDENT" || role === "ALUMNI") ? { studentId: session.user.id } : {}
+  const whereCondition = (role === "STUDENT" || role === "ALUMNI" || role === "OTHER") ? { studentId: session.user.id } : {}
 
   const donations = await db.donation.findMany({
     where: { ...whereCondition, deletedAt: null },
@@ -49,7 +49,7 @@ export default async function DonationsPage() {
   const pendingDonations = donations.filter(d => d.status === "PENDING")
   // Students/Alumni see all their own donations (including pending & rejected)
   // Admins/Volunteers see history (non-pending) donations
-  const historyDonations = (role === "STUDENT" || role === "ALUMNI") 
+  const historyDonations = (role === "STUDENT" || role === "ALUMNI" || role === "OTHER") 
     ? donations 
     : donations.filter(d => d.status !== "PENDING")
 
@@ -73,7 +73,7 @@ export default async function DonationsPage() {
         {isAdminOrVolunteer && (
           <AddDonationDialog students={students} />
         )}
-        {(role === "STUDENT" || role === "ALUMNI") && (
+        {(role === "STUDENT" || role === "ALUMNI" || role === "OTHER") && (
           <StudentDonationDialog />
         )}
       </div>

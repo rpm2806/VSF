@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   
   const role = session.user.role as string
 
-  if (role === "STUDENT" || role === "ALUMNI") {
+  if (role === "STUDENT" || role === "ALUMNI" || role === "OTHER") {
     const student = await db.student.findUnique({
       where: { id: session.user.id }
     })

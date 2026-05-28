@@ -91,10 +91,16 @@ export default function SignupPage() {
       Object.entries(formData).forEach(([key, value]) => {
         if (value) {
           // Normalize text values to uppercase
-          const upperVal = typeof value === "string" ? value.toUpperCase() : value
+          let upperVal = typeof value === "string" ? value.toUpperCase() : value
+          if (key === "batch" && formData.role === "OTHER") {
+            upperVal = "OTHER"
+          }
           data.append(key, upperVal)
         }
       })
+      if (formData.role === "OTHER" && !formData.batch) {
+        data.append("batch", "OTHER")
+      }
       if (profileImage) data.append("profileImage", profileImage)
       if (idProofImage) data.append("idProofImage", idProofImage)
 
@@ -150,6 +156,7 @@ export default function SignupPage() {
                     <SelectContent>
                       <SelectItem value="STUDENT">Student</SelectItem>
                       <SelectItem value="ALUMNI">Alumni</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

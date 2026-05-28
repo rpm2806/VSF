@@ -6,7 +6,7 @@ import { logActivity } from "@/lib/audit"
 export async function PATCH(req: Request) {
   try {
     const session = await auth()
-    if (!session?.user || (session.user.role !== "STUDENT" && session.user.role !== "ALUMNI")) {
+    if (!session?.user || (session.user.role !== "STUDENT" && session.user.role !== "ALUMNI" && session.user.role !== "OTHER")) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 

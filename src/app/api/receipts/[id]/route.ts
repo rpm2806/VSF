@@ -30,7 +30,7 @@ export async function GET(
     // Role check: Only the student themselves, or Admin/Volunteer can view
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userRole = (session.user as any).role
-    if ((userRole === "STUDENT" || userRole === "ALUMNI") && session.user.id !== receipt.studentId) {
+    if ((userRole === "STUDENT" || userRole === "ALUMNI" || userRole === "OTHER") && session.user.id !== receipt.studentId) {
       return new NextResponse("Unauthorized", { status: 403 })
     }
 

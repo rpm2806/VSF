@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Determine studentId: if student, it's them. If admin, it's from body.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userRole = (session.user as any).role
-    const studentId = (userRole === "STUDENT" || userRole === "ALUMNI") ? session.user.id : body.studentId
+    const studentId = (userRole === "STUDENT" || userRole === "ALUMNI" || userRole === "OTHER") ? session.user.id : body.studentId
 
     if (!studentId) return new NextResponse("Student ID is required", { status: 400 })
 

@@ -13,7 +13,10 @@ export async function POST(req: Request) {
     const email = (formData.get("email") as string || "").toUpperCase()
     const role = (formData.get("role") as string || "STUDENT").toUpperCase()
     const joiningYear = formData.get("joiningYear") as string
-    const batch = (formData.get("batch") as string || "").toUpperCase()
+    let batch = (formData.get("batch") as string || "").toUpperCase()
+    if (role === "OTHER") {
+      batch = "OTHER"
+    }
     const studentClass = (formData.get("class") as string || "").toUpperCase()
     const bloodGroup = (formData.get("bloodGroup") as string || "").toUpperCase()
     const aadhaarNumber = (formData.get("aadhaarNumber") as string || "").toUpperCase()

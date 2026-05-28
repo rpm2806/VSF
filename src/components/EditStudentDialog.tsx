@@ -320,6 +320,7 @@ export function EditStudentDialog({ student }: { student: any }) {
                 <SelectContent>
                   <SelectItem value="STUDENT">Student</SelectItem>
                   <SelectItem value="ALUMNI">Alumni</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
