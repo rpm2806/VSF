@@ -302,6 +302,9 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
               <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("joiningYear")}>
                 <div className="flex items-center gap-1">Joining <ArrowUpDown className="h-3 w-3" /></div>
               </TableHead>
+              <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("batch")}>
+                <div className="flex items-center gap-1">Batch <ArrowUpDown className="h-3 w-3" /></div>
+              </TableHead>
               <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("pendingDues")}>
                 <div className="flex items-center gap-1">Pending Dues <ArrowUpDown className="h-3 w-3" /></div>
               </TableHead>
@@ -317,7 +320,7 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
           <TableBody>
             {sortedStudents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No students found.
                 </TableCell>
               </TableRow>
@@ -328,6 +331,11 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
                   <TableCell className="font-medium">{student.fullName}</TableCell>
                   <TableCell>{student.mobileNumber}</TableCell>
                   <TableCell>{student.joiningYear}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="font-semibold px-2 py-0.5 bg-muted text-muted-foreground border-none">
+                      {student.batch || "—"}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     <span className={student.pendingDues > 0 ? "text-orange-600 font-semibold" : "text-emerald-600"}>
                       ₹{student.pendingDues.toLocaleString()}
