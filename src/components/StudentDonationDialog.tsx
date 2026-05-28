@@ -91,8 +91,17 @@ export default function StudentDonationDialog() {
       })
 
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || "Failed to submit donation")
+        let errMsg = "Failed to submit donation"
+        try {
+          const data = await res.json()
+          errMsg = data.error || errMsg
+        } catch (_) {
+          try {
+            const rawText = await res.text()
+            errMsg = rawText || errMsg
+          } catch (__) {}
+        }
+        throw new Error(errMsg)
       }
 
       toast.success(

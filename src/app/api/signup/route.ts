@@ -97,6 +97,9 @@ export async function POST(req: Request) {
     return NextResponse.json(student)
   } catch (error) {
     console.error("[SIGNUP_POST]", error)
-    return new NextResponse("Internal Error", { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal Server Error" },
+      { status: 500 }
+    )
   }
 }

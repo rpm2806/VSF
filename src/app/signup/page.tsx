@@ -111,8 +111,17 @@ export default function SignupPage() {
       })
 
       if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.error || "Failed to register")
+        let errMsg = "Failed to register"
+        try {
+          const err = await response.json()
+          errMsg = err.error || errMsg
+        } catch (_) {
+          try {
+            const rawText = await response.text()
+            errMsg = rawText || errMsg
+          } catch (__) {}
+        }
+        throw new Error(errMsg)
       }
       
       toast.success("Registration submitted! Awaiting admin approval.")
