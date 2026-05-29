@@ -36,33 +36,40 @@ export async function GET(
 
     const { student, donation } = receipt
 
-    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-    const mn = (m: number | null | undefined) => m ? MONTHS[m - 1] : ""
-
-    // Build receipt line items
-    const lineItems: { description: string; amount: number }[] = []
-
-    if (donation.type === "ADVANCE" && donation.startMonth && donation.endMonth && donation.startYear && donation.endYear) {
-      const startLabel = `${mn(donation.startMonth)} ${donation.startYear}`
-      const endLabel   = `${mn(donation.endMonth)} ${donation.endYear}`
-      // Monthly portion = 1 unit; rest = advance months
-      const advanceMonths = (donation.endYear - donation.startYear) * 12 + (donation.endMonth - donation.startMonth)
-      const perMonth = advanceMonths > 0 ? Math.round((receipt.amount / (advanceMonths + 1)) * 100) / 100 : receipt.amount
-      const advanceAmt = Math.round((receipt.amount - perMonth) * 100) / 100
-      lineItems.push({ description: `Monthly Mandatory Donation (${startLabel})`, amount: perMonth })
-      if (advanceMonths > 0) {
-        const nm = donation.startMonth % 12 + 1
-        const ny = donation.startMonth === 12 ? donation.startYear + 1 : donation.startYear
-        lineItems.push({ description: `Advance Donation (${mn(nm)} ${ny} - ${endLabel})`, amount: advanceAmt })
+    // Calculate dynamic daily period covered (where ₹1 = 1 day)
+    const baseDate = student.donationStartDate || student.createdAt
+    const previousDonations = await db.donation.findMany({
+      where: {
+        studentId: student.id,
+        status: "PAID",
+        deletedAt: null,
+        createdAt: { lt: donation.createdAt }
       }
-    } else {
-      const startLabel = `${mn(donation.startMonth)} ${donation.startYear}`
-      const endLabel   = donation.endMonth ? ` - ${mn(donation.endMonth)} ${donation.endYear}` : ""
-      lineItems.push({
-        description: `${donation.type === "MONTHLY" ? "Monthly Donation" : "Donation"} (${startLabel}${endLabel})`,
-        amount: receipt.amount,
-      })
+    })
+    const previousPaidAmount = previousDonations.reduce((acc, d) => acc + d.amount, 0)
+    
+    const startIST = new Date(new Date(baseDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+    startIST.setHours(0, 0, 0, 0)
+
+    const startCovered = new Date(startIST)
+    startCovered.setDate(startCovered.getDate() + previousPaidAmount)
+
+    const endCovered = new Date(startCovered)
+    endCovered.setDate(endCovered.getDate() + donation.amount - 1)
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
     }
+
+    const periodCovered = `${formatDate(startCovered)} - ${formatDate(endCovered)}`
+
+    // Build receipt line items based on exact daily period covered
+    const lineItems = [
+      {
+        description: `Federation Dues (${periodCovered})`,
+        amount: receipt.amount
+      }
+    ]
 
     // Calculate current dues standing for this student
     const allStudentDonations = await db.donation.findMany({
@@ -94,10 +101,6 @@ export async function GET(
     } else {
       pendingDues = Math.max(0, (student.duesAmount || 0) - totalDonations)
     }
-
-    const periodCovered = donation.endMonth
-      ? `${mn(donation.startMonth)} ${donation.startYear} - ${mn(donation.endMonth)} ${donation.endYear}`
-      : `${mn(donation.startMonth)} ${donation.startYear}`
 
     const pdfData = {
       receiptNumber: receipt.receiptNumber,

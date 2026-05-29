@@ -134,9 +134,32 @@ export async function POST(req: Request) {
       // Try sending email
       const student = await db.student.findUnique({ where: { id: studentId }})
       if (student && student.email) {
-        const periodCovered = donation.endMonth 
-          ? `${donation.startMonth}/${donation.startYear} - ${donation.endMonth}/${donation.endYear}`
-          : `${donation.startMonth}/${donation.startYear}`
+        // Calculate dynamic daily period covered (where ₹1 = 1 day)
+        const baseDate = student.donationStartDate || student.createdAt
+        const previousDonations = await db.donation.findMany({
+          where: {
+            studentId: student.id,
+            status: "PAID",
+            deletedAt: null,
+            createdAt: { lt: donation.createdAt }
+          }
+        })
+        const previousPaidAmount = previousDonations.reduce((acc, d) => acc + d.amount, 0)
+        
+        const startIST = new Date(new Date(baseDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+        startIST.setHours(0, 0, 0, 0)
+
+        const startCovered = new Date(startIST)
+        startCovered.setDate(startCovered.getDate() + previousPaidAmount)
+
+        const endCovered = new Date(startCovered)
+        endCovered.setDate(endCovered.getDate() + donation.amount - 1)
+
+        const formatDate = (date: Date) => {
+          return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        }
+
+        const periodCovered = `${formatDate(startCovered)} - ${formatDate(endCovered)}`
 
         // Calculate current dues standing for this student
         const allStudentDonations = await db.donation.findMany({
@@ -313,9 +336,32 @@ export async function PATCH(req: Request) {
       if (receiptGenerated && receipt) {
         const student = await db.student.findUnique({ where: { id: donation.studentId }})
         if (student && student.email) {
-          const periodCovered = donation.endMonth 
-            ? `${donation.startMonth}/${donation.startYear} - ${donation.endMonth}/${donation.endYear}`
-            : `${donation.startMonth}/${donation.startYear}`
+          // Calculate dynamic daily period covered (where ₹1 = 1 day)
+          const baseDate = student.donationStartDate || student.createdAt
+          const previousDonations = await db.donation.findMany({
+            where: {
+              studentId: student.id,
+              status: "PAID",
+              deletedAt: null,
+              createdAt: { lt: donation.createdAt }
+            }
+          })
+          const previousPaidAmount = previousDonations.reduce((acc, d) => acc + d.amount, 0)
+          
+          const startIST = new Date(new Date(baseDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+          startIST.setHours(0, 0, 0, 0)
+
+          const startCovered = new Date(startIST)
+          startCovered.setDate(startCovered.getDate() + previousPaidAmount)
+
+          const endCovered = new Date(startCovered)
+          endCovered.setDate(endCovered.getDate() + donation.amount - 1)
+
+          const formatDate = (date: Date) => {
+            return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+          }
+
+          const periodCovered = `${formatDate(startCovered)} - ${formatDate(endCovered)}`
 
           // Calculate current dues standing for this student
           const allStudentDonations = await db.donation.findMany({
