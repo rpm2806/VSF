@@ -35,7 +35,12 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
     bloodGroup: student.bloodGroup || "",
     aadhaarNumber: student.aadhaarNumber || "",
     dob: student.dob || "",
-    duesAmount: student.duesAmount ? student.duesAmount.toString() : "0",
+    duesAmount: (() => {
+      if (student.advanceBalance && student.advanceBalance > 0) {
+        return `-${student.advanceBalance}`;
+      }
+      return student.pendingDues !== undefined ? student.pendingDues.toString() : (student.duesAmount ? student.duesAmount.toString() : "0");
+    })(),
     parentsName: student.parentsName || "",
     fatherName: student.fatherName || "",
     motherName: student.motherName || "",
@@ -330,22 +335,28 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duesAmount">Monthly Dues (₹)</Label>
+              <Label htmlFor="duesAmount">Dues Amount (₹)</Label>
               <Input 
                 id="duesAmount" 
                 type="number"
                 value={formData.duesAmount}
                 onChange={e => setFormData({...formData, duesAmount: e.target.value})}
               />
+              <p className="text-[10px] text-muted-foreground leading-tight">
+                Entering an amount will automatically calculate the dues start date for this user.
+              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="donationStartDate">Dues Start Date</Label>
+              <Label htmlFor="donationStartDate">Custom Dues Start Date</Label>
               <Input 
                 id="donationStartDate" 
                 type="date"
                 value={formData.donationStartDate}
                 onChange={e => setFormData({...formData, donationStartDate: e.target.value})}
               />
+              <p className="text-[10px] text-muted-foreground leading-tight">
+                Or select a specific date from when daily dues should accumulate.
+              </p>
             </div>
           </div>
 

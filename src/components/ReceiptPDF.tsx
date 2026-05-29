@@ -179,6 +179,8 @@ interface ReceiptProps {
   email?: string
   batch?: string
   studentClass?: string
+  pendingDues?: number
+  advanceBalance?: number
 }
 
 export const ReceiptPDF = ({
@@ -194,11 +196,13 @@ export const ReceiptPDF = ({
   email,
   batch,
   studentClass,
+  pendingDues = 0,
+  advanceBalance = 0,
 }: ReceiptProps) => {
-  const batchDisplay = [studentClass, batch].filter(Boolean).join(' – ') || 'N/A'
+  const batchDisplay = [studentClass, batch].filter(Boolean).join(' - ') || 'N/A'
   const items = lineItems && lineItems.length > 0
     ? lineItems
-    : [{ description: `Federation Donation – ${periodCovered}`, amount }]
+    : [{ description: `Federation Donation - ${periodCovered}`, amount }]
 
   return (
     <Document>
@@ -217,7 +221,7 @@ export const ReceiptPDF = ({
           </View>
           <View style={styles.receiptBadge}>
             <Text style={styles.badgeTitle}>DONATION{'\n'}RECEIPT</Text>
-            <Text style={styles.badgeSub}>✓ Verified</Text>
+            <Text style={styles.badgeSub}>Verified</Text>
           </View>
         </View>
 
@@ -280,7 +284,7 @@ export const ReceiptPDF = ({
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={styles.tableHeaderDesc}>Description</Text>
-            <Text style={styles.tableHeaderAmt}>Amount (₹)</Text>
+            <Text style={styles.tableHeaderAmt}>Amount (Rs.)</Text>
           </View>
           {items.map((item, i) => (
             <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#fff' : GREEN_LIGHT }]}>
@@ -290,7 +294,20 @@ export const ReceiptPDF = ({
           ))}
           <View style={styles.tableTotalRow}>
             <Text style={styles.tableTotalLabel}>Total Amount Received</Text>
-            <Text style={styles.tableTotalAmt}>₹ {amount.toFixed(2)}</Text>
+            <Text style={styles.tableTotalAmt}>Rs. {amount.toFixed(2)}</Text>
+          </View>
+        </View>
+
+        {/* DUES STANDING */}
+        <Text style={styles.sectionTitle}>Dues Standing (Post-Payment)</Text>
+        <View style={styles.payRow}>
+          <View style={styles.payCell}>
+            <Text style={styles.payCellLabel}>Current Pending Dues</Text>
+            <Text style={styles.payCellValue}>Rs. {pendingDues.toFixed(2)}</Text>
+          </View>
+          <View style={styles.payCellLast}>
+            <Text style={styles.payCellLabel}>Current Advance Balance</Text>
+            <Text style={styles.payCellValue}>Rs. {advanceBalance.toFixed(2)}</Text>
           </View>
         </View>
 
@@ -308,7 +325,7 @@ export const ReceiptPDF = ({
             <Text style={styles.signSub}>Vriksh Students Federation</Text>
           </View>
           <View style={styles.stamp}>
-            <Text style={styles.stampText}>✓ PAID</Text>
+            <Text style={styles.stampText}>PAID</Text>
             <Text style={styles.stampSub}>VERIFIED</Text>
           </View>
         </View>

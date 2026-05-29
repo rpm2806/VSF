@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertCircle, IndianRupee, Users, ArrowUpRight, ArrowDownRight, HeartHandshake } from "lucide-react"
+import { AlertCircle, IndianRupee, Users, ArrowUpRight, ArrowDownRight, HeartHandshake, CheckCircle2 } from "lucide-react"
 import { OverviewChart } from "@/components/OverviewChart"
 
 export default async function DashboardPage() {
@@ -39,18 +39,24 @@ export default async function DashboardPage() {
     })
 
     activeStudents.forEach(student => {
-      if (student.donationStartDate) {
-        const start = new Date(student.donationStartDate)
-        const now = new Date()
-        const startUTC = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
-        const nowUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+      const totalDonated = student.donations.reduce((acc, d) => acc + d.amount, 0)
+      const effectiveStartDate = student.donationStartDate || student.createdAt
+      if (effectiveStartDate) {
+        const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+        const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+        const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+        const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
         const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
-        const totalDays = diffDays >= 0 ? diffDays + 1 : 0
-        const totalOwed = totalDays * 1
-        const totalDonated = student.donations.reduce((acc, d) => acc + d.amount, 0)
-        adminTotalPendingDues += Math.max(0, totalOwed - totalDonated)
+        
+        if (diffDays >= 0) {
+          const totalDays = diffDays + 1
+          const totalOwed = (totalDays * 1) + (student.duesAmount || 0)
+          adminTotalPendingDues += Math.max(0, totalOwed - totalDonated)
+        } else {
+          adminTotalPendingDues += Math.max(0, (student.duesAmount || 0) - totalDonated)
+        }
       } else {
-        adminTotalPendingDues += student.duesAmount || 0
+        adminTotalPendingDues += Math.max(0, (student.duesAmount || 0) - totalDonated)
       }
     })
 
@@ -82,6 +88,7 @@ export default async function DashboardPage() {
   let studentData = null
   let totalStudentDonations = 0
   let studentPendingDues = 0
+  let studentAdvanceBalance = 0
 
   if (role === "STUDENT" || role === "ALUMNI" || role === "OTHER") {
     studentData = await db.student.findUnique({ where: { id: session.user.id } })
@@ -91,24 +98,27 @@ export default async function DashboardPage() {
     })
     totalStudentDonations = sum._sum.amount || 0
 
-    if (studentData?.donationStartDate) {
-      const start = new Date(studentData.donationStartDate)
-      const now = new Date()
-      
-      // Calculate days difference (midnight to midnight)
-      const startUTC = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
-      const nowUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+    const effectiveStartDate = studentData?.donationStartDate || studentData?.createdAt
+    if (effectiveStartDate) {
+      const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+      const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
       const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
       
-      // Add 1 to make it inclusive of the start day
-      const totalDays = diffDays >= 0 ? diffDays + 1 : 0
-      
-      // 1 Rupee per day
-      const totalOwed = totalDays * 1
-      
-      studentPendingDues = Math.max(0, totalOwed - totalStudentDonations)
+      if (diffDays >= 0) {
+        const totalDays = diffDays + 1
+        const totalOwed = (totalDays * 1) + (studentData?.duesAmount || 0)
+        studentPendingDues = Math.max(0, totalOwed - totalStudentDonations)
+        studentAdvanceBalance = Math.max(0, totalStudentDonations - totalOwed)
+      } else {
+        const advanceDays = Math.abs(diffDays)
+        studentPendingDues = Math.max(0, (studentData?.duesAmount || 0) - totalStudentDonations)
+        studentAdvanceBalance = Math.max(0, totalStudentDonations - (studentData?.duesAmount || 0)) + (advanceDays * 1)
+      }
     } else {
-      studentPendingDues = studentData?.duesAmount || 0
+      studentPendingDues = Math.max(0, (studentData?.duesAmount || 0) - totalStudentDonations)
+      studentAdvanceBalance = Math.max(0, totalStudentDonations - (studentData?.duesAmount || 0))
     }
   }
 
@@ -203,16 +213,29 @@ export default async function DashboardPage() {
               <p className="text-xs text-muted-foreground mt-1">Lifetime contributions</p>
             </CardContent>
           </Card>
-          <Card className="shadow-sm border-border/50 border-orange-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-orange-700">Pending Dues</CardTitle>
-              <AlertCircle className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">₹{studentPendingDues.toLocaleString()}</div>
-              <p className="text-xs text-orange-600/80 mt-1">Calculated at ₹1/day from start date</p>
-            </CardContent>
-          </Card>
+          {studentAdvanceBalance > 0 ? (
+            <Card className="shadow-sm border-border/50 border-emerald-200 bg-emerald-50/20">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-emerald-700">Advance Balance</CardTitle>
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-emerald-600">₹{studentAdvanceBalance.toLocaleString()}</div>
+                <p className="text-xs text-emerald-600/80 mt-1">Dues fully cleared! You are covered in advance.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-sm border-border/50 border-orange-200">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-orange-700">Pending Dues</CardTitle>
+                <AlertCircle className="h-4 w-4 text-orange-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">₹{studentPendingDues.toLocaleString()}</div>
+                <p className="text-xs text-orange-600/80 mt-1">Calculated at ₹1/day from start date</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 

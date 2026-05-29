@@ -90,8 +90,27 @@ export async function POST(req: Request) {
 
     // Auto-generate receipt if PAID
     if (status === "PAID") {
-      const receiptCount = await db.receipt.count()
-      const receiptNumber = `VSF-REC-${new Date().getFullYear()}-${(receiptCount + 1).toString().padStart(5, '0')}`
+      const currentYear = new Date().getFullYear()
+      const latestReceipt = await db.receipt.findFirst({
+        where: {
+          receiptNumber: {
+            startsWith: `VSF-REC-${currentYear}-`
+          }
+        },
+        orderBy: {
+          receiptNumber: 'desc'
+        }
+      })
+
+      let nextNumber = 1
+      if (latestReceipt) {
+        const parts = latestReceipt.receiptNumber.split('-')
+        const lastSuffix = parseInt(parts[parts.length - 1], 10)
+        if (!isNaN(lastSuffix)) {
+          nextNumber = lastSuffix + 1
+        }
+      }
+      const receiptNumber = `VSF-REC-${currentYear}-${nextNumber.toString().padStart(5, '0')}`
       
       const receipt = await db.receipt.create({
         data: {
@@ -108,6 +127,37 @@ export async function POST(req: Request) {
         const periodCovered = donation.endMonth 
           ? `${donation.startMonth}/${donation.startYear} - ${donation.endMonth}/${donation.endYear}`
           : `${donation.startMonth}/${donation.startYear}`
+
+        // Calculate current dues standing for this student
+        const allStudentDonations = await db.donation.findMany({
+          where: { studentId: student.id, status: "PAID", deletedAt: null }
+        })
+        const totalDonations = allStudentDonations.reduce((acc, d) => acc + d.amount, 0)
+
+        let pendingDues = 0
+        let advanceBalance = 0
+
+        const effectiveStartDate = student.donationStartDate || student.createdAt
+        if (effectiveStartDate) {
+          const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+          const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+          const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+          const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
+          const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
+
+          if (diffDays >= 0) {
+            const totalDays = diffDays + 1
+            const totalOwed = (totalDays * 1) + (student.duesAmount || 0)
+            pendingDues    = Math.max(0, totalOwed - totalDonations)
+            advanceBalance = Math.max(0, totalDonations - totalOwed)
+          } else {
+            const advanceDays = Math.abs(diffDays)
+            pendingDues    = Math.max(0, (student.duesAmount || 0) - totalDonations)
+            advanceBalance = Math.max(0, totalDonations - (student.duesAmount || 0)) + (advanceDays * 1)
+          }
+        } else {
+          pendingDues = Math.max(0, (student.duesAmount || 0) - totalDonations)
+        }
           
         const pdfData = {
           receiptNumber: receipt.receiptNumber,
@@ -115,12 +165,16 @@ export async function POST(req: Request) {
           studentName: student.fullName,
           federationId: student.federationId,
           amount: receipt.amount,
-          paymentType: donation.paymentMethod || "N/A",
+          paymentType: donation.paymentMethod === "CASH" && donation.notes 
+            ? `Cash (Given to: ${donation.notes})` 
+            : (donation.paymentMethod || "N/A"),
           periodCovered,
           mobileNumber: student.mobileNumber || undefined,
           email: student.email || undefined,
           batch: student.batch || undefined,
           studentClass: student.class || undefined,
+          pendingDues,
+          advanceBalance,
         }
         
         try {
@@ -188,66 +242,140 @@ export async function PATCH(req: Request) {
     }
 
     if (action === "VERIFY") {
-      const donation = await db.donation.update({
-        where: { id: donationId },
-        data: {
-          status: "PAID",
-          verifiedById: session.user.id,
-          verifiedAt: new Date()
-        }
-      })
-
-      // Generate receipt
-      const receiptCount = await db.receipt.count()
-      const receiptNumber = `VSF-REC-${new Date().getFullYear()}-${(receiptCount + 1).toString().padStart(5, '0')}`
+      // Check if donation is already verified (defensive check against double-clicks/glitches)
+      const existingDonation = await db.donation.findUnique({ where: { id: donationId } })
+      if (!existingDonation) {
+        return new NextResponse("Donation not found", { status: 404 })
+      }
       
-      const receipt = await db.receipt.create({
-        data: {
-          receiptNumber,
-          studentId: donation.studentId,
-          donationId: donation.id,
-          amount: donation.amount
-        }
-      })
+      let donation = existingDonation
+      let receiptGenerated = false
 
-      // Try sending email
-      const student = await db.student.findUnique({ where: { id: donation.studentId }})
-      if (student && student.email) {
-        const periodCovered = donation.endMonth 
-          ? `${donation.startMonth}/${donation.startYear} - ${donation.endMonth}/${donation.endYear}`
-          : `${donation.startMonth}/${donation.startYear}`
-          
-        const pdfData = {
-          receiptNumber: receipt.receiptNumber,
-          date: receipt.date.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
-          studentName: student.fullName,
-          federationId: student.federationId,
-          amount: receipt.amount,
-          paymentType: donation.paymentMethod || "N/A",
-          periodCovered,
-          mobileNumber: student.mobileNumber || undefined,
-          email: student.email || undefined,
-          batch: student.batch || undefined,
-          studentClass: student.class || undefined,
-        }
-        
-        try {
-          // @ts-expect-error -- react-pdf renderToBuffer typing
-          const pdfBuffer = await renderToBuffer(React.createElement(ReceiptPDF, pdfData))
-          await sendReceiptEmail(student.email, student.fullName, donation.amount, periodCovered, pdfBuffer)
-        } catch (e) {
-          console.error("Failed to generate or send receipt:", e)
-        }
+      if (existingDonation.status !== "PAID") {
+        donation = await db.donation.update({
+          where: { id: donationId },
+          data: {
+            status: "PAID",
+            verifiedById: session.user.id,
+            verifiedAt: new Date()
+          }
+        })
+        receiptGenerated = true
       }
 
-      // Log Activity
-      await logActivity({
-        userId: session.user.id,
-        action: "DONATION_VERIFIED",
-        entityType: "DONATION",
-        entityId: donation.id,
-        details: `Verified ₹${donation.amount} UPI donation`
-      })
+      // Generate receipt if it doesn't already exist (acts as auto-repair/regeneration if missing)
+      let receipt = await db.receipt.findUnique({ where: { donationId } })
+      if (!receipt) {
+        const currentYear = new Date().getFullYear()
+        const latestReceipt = await db.receipt.findFirst({
+          where: {
+            receiptNumber: {
+              startsWith: `VSF-REC-${currentYear}-`
+            }
+          },
+          orderBy: {
+            receiptNumber: 'desc'
+          }
+        })
+
+        let nextNumber = 1
+        if (latestReceipt) {
+          const parts = latestReceipt.receiptNumber.split('-')
+          const lastSuffix = parseInt(parts[parts.length - 1], 10)
+          if (!isNaN(lastSuffix)) {
+            nextNumber = lastSuffix + 1
+          }
+        }
+        const receiptNumber = `VSF-REC-${currentYear}-${nextNumber.toString().padStart(5, '0')}`
+
+        receipt = await db.receipt.create({
+          data: {
+            receiptNumber,
+            studentId: donation.studentId,
+            donationId: donation.id,
+            amount: donation.amount
+          }
+        })
+        receiptGenerated = true
+      }
+
+      // Try sending email if we generated a receipt
+      if (receiptGenerated && receipt) {
+        const student = await db.student.findUnique({ where: { id: donation.studentId }})
+        if (student && student.email) {
+          const periodCovered = donation.endMonth 
+            ? `${donation.startMonth}/${donation.startYear} - ${donation.endMonth}/${donation.endYear}`
+            : `${donation.startMonth}/${donation.startYear}`
+
+          // Calculate current dues standing for this student
+          const allStudentDonations = await db.donation.findMany({
+            where: { studentId: student.id, status: "PAID", deletedAt: null }
+          })
+          const totalDonations = allStudentDonations.reduce((acc, d) => acc + d.amount, 0)
+
+          let pendingDues = 0
+          let advanceBalance = 0
+
+          const effectiveStartDate = student.donationStartDate || student.createdAt
+          if (effectiveStartDate) {
+            const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+            const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+            const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+            const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
+            const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
+
+            if (diffDays >= 0) {
+              const totalDays = diffDays + 1
+              const totalOwed = (totalDays * 1) + (student.duesAmount || 0)
+              pendingDues    = Math.max(0, totalOwed - totalDonations)
+              advanceBalance = Math.max(0, totalDonations - totalOwed)
+            } else {
+              const advanceDays = Math.abs(diffDays)
+              pendingDues    = Math.max(0, (student.duesAmount || 0) - totalDonations)
+              advanceBalance = Math.max(0, totalDonations - (student.duesAmount || 0)) + (advanceDays * 1)
+            }
+          } else {
+            pendingDues = Math.max(0, (student.duesAmount || 0) - totalDonations)
+          }
+            
+          const pdfData = {
+            receiptNumber: receipt.receiptNumber,
+            date: receipt.date.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
+            studentName: student.fullName,
+            federationId: student.federationId,
+            amount: receipt.amount,
+            paymentType: donation.paymentMethod === "CASH" && donation.notes 
+              ? `Cash (Given to: ${donation.notes})` 
+              : (donation.paymentMethod || "N/A"),
+            periodCovered,
+            mobileNumber: student.mobileNumber || undefined,
+            email: student.email || undefined,
+            batch: student.batch || undefined,
+            studentClass: student.class || undefined,
+            pendingDues,
+            advanceBalance,
+          }
+          
+          try {
+            // @ts-expect-error -- react-pdf renderToBuffer typing
+            const pdfBuffer = await renderToBuffer(React.createElement(ReceiptPDF, pdfData))
+            await sendReceiptEmail(student.email, student.fullName, donation.amount, periodCovered, pdfBuffer)
+          } catch (e) {
+            console.error("Failed to generate or send receipt:", e)
+          }
+        }
+
+        // Log Activity only if it was newly verified (or newly generated a receipt)
+        await logActivity({
+          userId: session.user.id,
+          action: existingDonation.status === "PAID" ? "RECEIPT_REGENERATED" : "DONATION_VERIFIED",
+          entityType: "DONATION",
+          entityId: donation.id,
+          details: existingDonation.status === "PAID" 
+            ? `Regenerated missing receipt for already verified ₹${donation.amount} UPI donation`
+            : `Verified ₹${donation.amount} UPI donation and generated receipt`
+        })
+      }
 
       return NextResponse.json(donation)
     }

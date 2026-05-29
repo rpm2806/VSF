@@ -232,22 +232,28 @@ export function AddStudentDialog({ initialBatch, existingBatches = [] }: { initi
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duesAmount">Monthly Dues (₹)</Label>
+              <Label htmlFor="duesAmount">Dues Amount (₹)</Label>
               <Input 
                 id="duesAmount" 
                 type="number"
                 value={formData.duesAmount}
                 onChange={e => setFormData({...formData, duesAmount: parseFloat(e.target.value) || 0})}
               />
+              <p className="text-[10px] text-muted-foreground leading-tight">
+                Entering an amount will automatically calculate the dues start date for this user.
+              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="donationStartDate">Dues Start Date</Label>
+              <Label htmlFor="donationStartDate">Custom Dues Start Date</Label>
               <Input 
                 id="donationStartDate" 
                 type="date"
                 value={formData.donationStartDate}
                 onChange={e => setFormData({...formData, donationStartDate: e.target.value})}
               />
+              <p className="text-[10px] text-muted-foreground leading-tight">
+                Or select a specific date from when daily dues should accumulate.
+              </p>
             </div>
             <div className="space-y-2 col-span-2">
               <Label htmlFor="fatherName">Father&apos;s Name</Label>

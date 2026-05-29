@@ -29,7 +29,11 @@ export default async function DonationsPage() {
   const donations = await db.donation.findMany({
     where: { ...whereCondition, deletedAt: null },
     include: {
-      student: { select: { fullName: true, federationId: true } },
+      student: {
+        include: {
+          donations: { where: { status: "PAID", deletedAt: null } }
+        }
+      },
       receipt: { select: { id: true } },
       verifiedBy: { select: { name: true } }
     },
@@ -120,9 +124,12 @@ export default async function DonationsPage() {
                     </TableCell>
                     <TableCell className="font-semibold text-emerald-600">₹{donation.amount}</TableCell>
                     <TableCell>
-                      <div>{donation.paymentMethod}</div>
+                      <div className="font-medium text-sm">{donation.paymentMethod}</div>
                       {donation.notes && (
-                        <div className="text-xs text-muted-foreground mt-0.5 italic">({donation.notes})</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 italic">
+                          {donation.paymentMethod === "CASH" ? "Given to: " : "Notes: "}
+                          <span className="font-semibold text-foreground not-italic">{donation.notes}</span>
+                        </div>
                       )}
                     </TableCell>
                     <TableCell>{new Date(donation.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" })}</TableCell>

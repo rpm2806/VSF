@@ -292,6 +292,7 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[60px] text-muted-foreground font-semibold">S.No.</TableHead>
               <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("federationId")}>
                 <div className="flex items-center gap-1">Federation ID <ArrowUpDown className="h-3 w-3" /></div>
               </TableHead>
@@ -320,13 +321,14 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
           <TableBody>
             {sortedStudents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   No students found.
                 </TableCell>
               </TableRow>
             ) : (
-              sortedStudents.map((student) => (
+              sortedStudents.map((student, index) => (
                 <TableRow key={student.id}>
+                  <TableCell className="font-medium text-xs text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-mono text-xs">{student.federationId}</TableCell>
                   <TableCell className="font-medium">{student.fullName}</TableCell>
                   <TableCell>{student.mobileNumber}</TableCell>

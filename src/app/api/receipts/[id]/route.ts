@@ -53,19 +53,50 @@ export async function GET(
       if (advanceMonths > 0) {
         const nm = donation.startMonth % 12 + 1
         const ny = donation.startMonth === 12 ? donation.startYear + 1 : donation.startYear
-        lineItems.push({ description: `Advance Donation (${mn(nm)} ${ny} \u2013 ${endLabel})`, amount: advanceAmt })
+        lineItems.push({ description: `Advance Donation (${mn(nm)} ${ny} - ${endLabel})`, amount: advanceAmt })
       }
     } else {
       const startLabel = `${mn(donation.startMonth)} ${donation.startYear}`
-      const endLabel   = donation.endMonth ? ` \u2013 ${mn(donation.endMonth)} ${donation.endYear}` : ""
+      const endLabel   = donation.endMonth ? ` - ${mn(donation.endMonth)} ${donation.endYear}` : ""
       lineItems.push({
         description: `${donation.type === "MONTHLY" ? "Monthly Donation" : "Donation"} (${startLabel}${endLabel})`,
         amount: receipt.amount,
       })
     }
 
+    // Calculate current dues standing for this student
+    const allStudentDonations = await db.donation.findMany({
+      where: { studentId: student.id, status: "PAID", deletedAt: null }
+    })
+    const totalDonations = allStudentDonations.reduce((acc, d) => acc + d.amount, 0)
+
+    let pendingDues = 0
+    let advanceBalance = 0
+
+    const effectiveStartDate = student.donationStartDate || student.createdAt
+    if (effectiveStartDate) {
+      const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+      const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
+      const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
+
+      if (diffDays >= 0) {
+        const totalDays = diffDays + 1
+        const totalOwed = (totalDays * 1) + (student.duesAmount || 0)
+        pendingDues    = Math.max(0, totalOwed - totalDonations)
+        advanceBalance = Math.max(0, totalDonations - totalOwed)
+      } else {
+        const advanceDays = Math.abs(diffDays)
+        pendingDues    = Math.max(0, (student.duesAmount || 0) - totalDonations)
+        advanceBalance = Math.max(0, totalDonations - (student.duesAmount || 0)) + (advanceDays * 1)
+      }
+    } else {
+      pendingDues = Math.max(0, (student.duesAmount || 0) - totalDonations)
+    }
+
     const periodCovered = donation.endMonth
-      ? `${mn(donation.startMonth)} ${donation.startYear} \u2013 ${mn(donation.endMonth)} ${donation.endYear}`
+      ? `${mn(donation.startMonth)} ${donation.startYear} - ${mn(donation.endMonth)} ${donation.endYear}`
       : `${mn(donation.startMonth)} ${donation.startYear}`
 
     const pdfData = {
@@ -74,13 +105,17 @@ export async function GET(
       studentName: student.fullName,
       federationId: student.federationId,
       amount: receipt.amount,
-      paymentType: donation.paymentMethod || "N/A",
+      paymentType: donation.paymentMethod === "CASH" && donation.notes 
+        ? `Cash (Given to: ${donation.notes})` 
+        : (donation.paymentMethod || "N/A"),
       periodCovered,
       lineItems,
       mobileNumber: student.mobileNumber || undefined,
       email: student.email || undefined,
       batch: student.batch || undefined,
       studentClass: student.class || undefined,
+      pendingDues,
+      advanceBalance,
     }
 
     // Render PDF to stream

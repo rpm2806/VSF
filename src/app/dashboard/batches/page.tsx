@@ -24,19 +24,26 @@ export default async function BatchesPage() {
     let pendingDues = 0
     let advanceBalance = 0
 
-    if (student.donationStartDate) {
-      const start = new Date(student.donationStartDate)
-      const now = new Date()
-      const startUTC = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
-      const nowUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+    const effectiveStartDate = student.donationStartDate || student.createdAt
+    if (effectiveStartDate) {
+      const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+      const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
       const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
-      const totalDays = diffDays >= 0 ? diffDays + 1 : 0
-      const totalOwed = totalDays * 1 // ₹1/day rate
 
-      pendingDues    = Math.max(0, totalOwed - totalDonations)
-      advanceBalance = Math.max(0, totalDonations - totalOwed)
+      if (diffDays >= 0) {
+        const totalDays = diffDays + 1
+        const totalOwed = (totalDays * 1) + (student.duesAmount || 0)
+        pendingDues    = Math.max(0, totalOwed - totalDonations)
+        advanceBalance = Math.max(0, totalDonations - totalOwed)
+      } else {
+        const advanceDays = Math.abs(diffDays)
+        pendingDues    = Math.max(0, (student.duesAmount || 0) - totalDonations)
+        advanceBalance = Math.max(0, totalDonations - (student.duesAmount || 0)) + (advanceDays * 1)
+      }
     } else {
-      pendingDues = student.duesAmount || 0
+      pendingDues = Math.max(0, (student.duesAmount || 0) - totalDonations)
     }
     return { ...student, pendingDues, advanceBalance }
   })

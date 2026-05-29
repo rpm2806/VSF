@@ -46,7 +46,8 @@ export function AddDonationDialog({ students }: { students: any[] }) {
     amount: "30",
     type: "MONTHLY",
     paymentMethod: "UPI",
-    paymentProof: ""
+    paymentProof: "",
+    notes: ""
   })
 
   // Calculate covered months preview
@@ -60,6 +61,10 @@ export function AddDonationDialog({ students }: { students: any[] }) {
     e.preventDefault()
     if (!formData.studentId) {
       toast.error("Please select a student.")
+      return
+    }
+    if (formData.paymentMethod === "CASH" && !formData.notes.trim()) {
+      toast.error("Please enter the name of the volunteer receiving the cash.")
       return
     }
     
@@ -179,7 +184,7 @@ export function AddDonationDialog({ students }: { students: any[] }) {
 
           <div className="space-y-2">
             <Label>Payment Method</Label>
-            <Select defaultValue="CASH" onValueChange={v => setFormData({...formData, paymentMethod: (v as string) || "CASH"})}>
+            <Select value={formData.paymentMethod} onValueChange={v => setFormData({...formData, paymentMethod: (v as string) || "UPI"})}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -190,6 +195,22 @@ export function AddDonationDialog({ students }: { students: any[] }) {
               </SelectContent>
             </Select>
           </div>
+
+          {formData.paymentMethod === "CASH" && (
+            <div className="space-y-2">
+              <Label htmlFor="notes">
+                Received by (Volunteer Name) <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                id="notes"
+                type="text"
+                placeholder="Enter the name of the volunteer receiving cash"
+                value={formData.notes}
+                onChange={e => setFormData({...formData, notes: e.target.value})}
+                required
+              />
+            </div>
+          )}
 
           <div className="pt-4 space-x-2 flex justify-end">
             <Button variant="outline" type="button" onClick={() => setOpen(false)}>Cancel</Button>

@@ -58,8 +58,67 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (bloodGroup !== undefined) updateData.bloodGroup = bloodGroup ? bloodGroup.toUpperCase() : null
     if (aadhaarNumber !== undefined) updateData.aadhaarNumber = aadhaarNumber ? aadhaarNumber.toUpperCase() : null
     if (dob !== undefined) updateData.dob = dob || null
-    if (duesAmount !== undefined) updateData.duesAmount = duesAmount ? parseFloat(duesAmount.toString()) : 0
-    if (donationStartDate !== undefined) updateData.donationStartDate = donationStartDate ? new Date(donationStartDate) : null
+    const currentStudent = await db.student.findUnique({ where: { id: studentId } })
+    if (!currentStudent) return new NextResponse("Student not found", { status: 404 })
+
+    const existingDateStr = currentStudent.donationStartDate 
+      ? new Date(currentStudent.donationStartDate).toISOString().split('T')[0] 
+      : ""
+    const newDateStr = donationStartDate 
+      ? new Date(donationStartDate).toISOString().split('T')[0] 
+      : ""
+
+    const dateChanged = donationStartDate !== undefined && newDateStr !== existingDateStr
+
+    if (dateChanged) {
+      updateData.donationStartDate = donationStartDate ? new Date(donationStartDate) : null
+      updateData.duesAmount = 0
+    } else if (duesAmount !== undefined) {
+      const parsedDues = parseFloat(duesAmount.toString())
+      if (!isNaN(parsedDues)) {
+        const donationsSum = await db.donation.aggregate({
+          _sum: { amount: true },
+          where: { studentId, status: "PAID", deletedAt: null }
+        })
+        const totalDonations = donationsSum._sum.amount || 0
+
+        const effectiveStartDate = currentStudent.donationStartDate || currentStudent.createdAt
+        let currentPendingDues = 0
+        if (effectiveStartDate) {
+          const startIST = new Date(new Date(effectiveStartDate).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+          const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+          const startUTC = Date.UTC(startIST.getFullYear(), startIST.getMonth(), startIST.getDate())
+          const nowUTC = Date.UTC(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate())
+          const diffDays = Math.floor((nowUTC - startUTC) / (1000 * 60 * 60 * 24))
+          
+          if (diffDays >= 0) {
+            const totalDays = diffDays + 1
+            const totalOwed = (totalDays * 1) + (currentStudent.duesAmount || 0)
+            currentPendingDues = totalOwed - totalDonations
+          } else {
+            const advanceDays = Math.abs(diffDays)
+            const advanceBal = totalDonations - (currentStudent.duesAmount || 0) + advanceDays
+            currentPendingDues = -advanceBal
+          }
+        }
+
+        if (parsedDues !== currentPendingDues) {
+          const todayIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+          todayIST.setHours(0, 0, 0, 0)
+
+          const totalDaysNeeded = totalDonations + parsedDues
+          const startIST = new Date(todayIST)
+          if (totalDaysNeeded >= 0) {
+            startIST.setDate(startIST.getDate() - (Math.round(totalDaysNeeded) - 1))
+          } else {
+            startIST.setDate(startIST.getDate() + Math.abs(Math.round(totalDaysNeeded)))
+          }
+
+          updateData.donationStartDate = startIST
+          updateData.duesAmount = 0
+        }
+      }
+    }
     if (lastSchool !== undefined) updateData.lastSchool = lastSchool ? lastSchool.toUpperCase() : null
     if (specialization !== undefined) updateData.specialization = specialization ? specialization.toUpperCase() : null
     if (permanentAddress !== undefined) updateData.permanentAddress = permanentAddress ? permanentAddress.toUpperCase() : null

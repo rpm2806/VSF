@@ -51,8 +51,23 @@ export async function POST(req: Request) {
         bloodGroup: bloodGroup ? bloodGroup.toUpperCase() : null,
         aadhaarNumber: aadhaarNumber ? aadhaarNumber.toUpperCase() : null,
         dob: dob || null,
-        duesAmount: duesAmount ? parseFloat(duesAmount) : 0,
-        donationStartDate: donationStartDate ? new Date(donationStartDate) : null,
+        duesAmount: 0,
+        donationStartDate: (() => {
+          if (donationStartDate) return new Date(donationStartDate);
+          const parsedDues = parseFloat(duesAmount || "0");
+          if (!isNaN(parsedDues) && parsedDues !== 0) {
+            const todayIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+            todayIST.setHours(0, 0, 0, 0);
+            const startIST = new Date(todayIST);
+            if (parsedDues > 0) {
+              startIST.setDate(startIST.getDate() - (Math.round(parsedDues) - 1));
+            } else {
+              startIST.setDate(startIST.getDate() + Math.abs(Math.round(parsedDues)));
+            }
+            return startIST;
+          }
+          return null;
+        })(),
         lastSchool: lastSchool ? lastSchool.toUpperCase() : null,
         specialization: specialization ? specialization.toUpperCase() : null,
         permanentAddress: permanentAddress ? permanentAddress.toUpperCase() : null,

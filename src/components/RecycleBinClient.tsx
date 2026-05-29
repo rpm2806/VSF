@@ -236,7 +236,11 @@ export default function RecycleBinClient() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="outline" className="text-[10px]">{d.status}</Badge>
                   {d.paymentMethod && <Badge variant="outline" className="text-[10px]">{d.paymentMethod}</Badge>}
-                  {d.notes && <span className="text-xs text-muted-foreground italic">({d.notes})</span>}
+                  {d.notes && (
+                    <span className="text-xs text-muted-foreground italic">
+                      {d.paymentMethod === "CASH" ? `Given to: ${d.notes}` : `(${d.notes})`}
+                    </span>
+                  )}
                 </div>
                 {d.verifiedBy && (
                   <p className="text-xs text-muted-foreground">Verified by: <span className="font-medium text-foreground">{d.verifiedBy.name}</span></p>
