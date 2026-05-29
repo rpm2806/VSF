@@ -31,6 +31,10 @@ export async function POST(req: Request) {
     // Auto-calculate months
     const monthsCovered = Math.floor(parsedAmount / 30)
     
+    // Fetch student to get their dues start date as baseline
+    const student = await db.student.findUnique({ where: { id: studentId } })
+    if (!student) return new NextResponse("Student not found", { status: 404 })
+
     // Find last donation to determine start month
     const lastDonation = await db.donation.findFirst({
       where: { studentId },
@@ -46,6 +50,12 @@ export async function POST(req: Request) {
       if (startMonth > 12) {
         startMonth = 1
         startYear += 1
+      }
+    } else {
+      const baseDate = student.donationStartDate || student.createdAt
+      if (baseDate) {
+        startMonth = new Date(baseDate).getMonth() + 1
+        startYear = new Date(baseDate).getFullYear()
       }
     }
 
