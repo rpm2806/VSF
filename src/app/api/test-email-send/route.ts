@@ -28,9 +28,9 @@ export async function GET() {
 
     // Try sending the sample email
     const result = await sendApprovalEmail(
-      "rupamkr2040@gmail.com",
-      "RUPAM KUMAR (Live Test)",
-      "VSF26004-TEST"
+      "vrikshstudentsfederation@gmail.com",
+      "Vriksh Federation (Live Test)",
+      "VSF26001-TEST"
     );
 
     if (result) {
