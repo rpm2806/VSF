@@ -4,13 +4,14 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
-import { ArrowLeft, UploadCloud, FileImage, FileText } from "lucide-react"
+import { ArrowLeft, UploadCloud, FileImage, FileText, Camera } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { compressImage } from "@/lib/image-compressor"
+import { CameraCapture } from "@/components/CameraCapture"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -42,6 +43,33 @@ export default function SignupPage() {
   const [profilePreview, setProfilePreview] = useState<string>("")
   const [idProofImage, setIdProofImage] = useState<File | null>(null)
   const [idProofPreview, setIdProofPreview] = useState<string>("")
+
+  const [profileCameraOpen, setProfileCameraOpen] = useState(false)
+  const [idProofCameraOpen, setIdProofCameraOpen] = useState(false)
+
+  const handleProfileCapture = async (file: File) => {
+    const toastId = toast.loading("Processing captured profile photo...")
+    try {
+      const optimized = await compressImage(file)
+      setProfileImage(optimized)
+      setProfilePreview(URL.createObjectURL(optimized))
+      toast.success("Profile photo captured and optimized!", { id: toastId })
+    } catch (err) {
+      toast.error("Failed to process captured image.", { id: toastId })
+    }
+  }
+
+  const handleIdProofCapture = async (file: File) => {
+    const toastId = toast.loading("Processing captured ID proof...")
+    try {
+      const optimized = await compressImage(file)
+      setIdProofImage(optimized)
+      setIdProofPreview(URL.createObjectURL(optimized))
+      toast.success("ID proof captured and optimized!", { id: toastId })
+    } catch (err) {
+      toast.error("Failed to process captured image.", { id: toastId })
+    }
+  }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -382,14 +410,13 @@ export default function SignupPage() {
               <h2 className="text-xl font-bold text-primary font-bold">5. Verification Documents</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="profileImage">Profile Photo *</Label>
-                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative flex flex-col items-center justify-center min-h-[160px]">
+                  <Label className="text-foreground font-semibold mb-1.5 block">Profile Photo *</Label>
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors flex flex-col items-center justify-center min-h-[180px] relative">
                     <input 
                       type="file" 
                       id="profileImage"
-                      required
                       accept="image/png, image/jpeg, image/jpg"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                      className="hidden"
                       onChange={async (e) => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
@@ -405,9 +432,9 @@ export default function SignupPage() {
                         }
                       }}
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2 text-primary z-10">
+                    <div className="flex flex-col items-center justify-center space-y-4 text-primary w-full">
                       {profilePreview ? (
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-3">
                           <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/40 shadow-md">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img 
@@ -417,13 +444,44 @@ export default function SignupPage() {
                             />
                           </div>
                           <span className="text-xs font-semibold text-muted-foreground max-w-[200px] truncate">{profileImage?.name}</span>
-                          <span className="text-xs font-bold text-primary hover:underline">Change Photo</span>
+                          <div className="flex items-center gap-3 mt-1">
+                            <label htmlFor="profileImage" className="text-xs font-bold text-primary hover:underline cursor-pointer">
+                              Upload New
+                            </label>
+                            <span className="text-xs text-muted-foreground/50">|</span>
+                            <button 
+                              type="button" 
+                              onClick={() => setProfileCameraOpen(true)} 
+                              className="text-xs font-bold text-primary hover:underline cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                            >
+                              Use Camera
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <>
-                          <UploadCloud className="w-8 h-8 opacity-75" />
-                          <span className="text-sm font-medium">Click to upload photo</span>
-                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 4MB)</span>
+                          <div className="p-3 bg-primary/10 rounded-full text-primary animate-pulse">
+                            <UploadCloud className="w-8 h-8" />
+                          </div>
+                          <span className="text-sm font-semibold text-foreground">Select Profile Photo</span>
+                          <div className="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-[320px] px-2">
+                            <label 
+                              htmlFor="profileImage" 
+                              className="flex items-center justify-center rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-xs px-4 py-2.5 cursor-pointer transition-all border border-primary/20 flex-1 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              <UploadCloud className="w-4 h-4 mr-2 text-primary" />
+                              Upload File
+                            </label>
+                            <button 
+                              type="button" 
+                              onClick={() => setProfileCameraOpen(true)}
+                              className="flex items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-semibold text-xs px-4 py-2.5 transition-all border border-emerald-200 dark:border-emerald-900/40 flex-1 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              <Camera className="w-4 h-4 mr-2" />
+                              Use Camera
+                            </button>
+                          </div>
+                          <span className="text-[11px] font-semibold text-rose-500 max-w-[220px] leading-tight">Only PNG, JPG or JPEG accepted (max 4MB)</span>
                         </>
                       )}
                     </div>
@@ -431,14 +489,13 @@ export default function SignupPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="idProofImage">ID Proof Photo (Aadhaar/School ID) *</Label>
-                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors border-2 border-dashed cursor-pointer relative flex flex-col items-center justify-center min-h-[160px]">
+                  <Label className="text-foreground font-semibold mb-1.5 block">ID Proof Photo (Aadhaar/School ID) *</Label>
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center bg-muted/40 hover:bg-muted/60 transition-colors flex flex-col items-center justify-center min-h-[180px] relative">
                     <input 
                       type="file" 
                       id="idProofImage"
-                      required
                       accept="image/png, image/jpeg, image/jpg"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                      className="hidden"
                       onChange={async (e) => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
@@ -454,9 +511,9 @@ export default function SignupPage() {
                         }
                       }}
                     />
-                    <div className="flex flex-col items-center justify-center space-y-2 text-primary z-10 w-full">
+                    <div className="flex flex-col items-center justify-center space-y-4 text-primary w-full">
                       {idProofPreview ? (
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-3">
                           <div className="relative w-40 h-24 rounded-lg overflow-hidden border-2 border-primary/40 shadow-md">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img 
@@ -466,13 +523,44 @@ export default function SignupPage() {
                             />
                           </div>
                           <span className="text-xs font-semibold text-muted-foreground max-w-[200px] truncate">{idProofImage?.name}</span>
-                          <span className="text-xs font-bold text-primary hover:underline">Change ID Photo</span>
+                          <div className="flex items-center gap-3 mt-1">
+                            <label htmlFor="idProofImage" className="text-xs font-bold text-primary hover:underline cursor-pointer">
+                              Upload New
+                            </label>
+                            <span className="text-xs text-muted-foreground/50">|</span>
+                            <button 
+                              type="button" 
+                              onClick={() => setIdProofCameraOpen(true)} 
+                              className="text-xs font-bold text-primary hover:underline cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                            >
+                              Use Camera
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <>
-                          <UploadCloud className="w-8 h-8 opacity-75" />
-                          <span className="text-sm font-medium">Click to upload ID photo</span>
-                          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Only PNG, JPG or JPEG accepted (max 4MB)</span>
+                          <div className="p-3 bg-primary/10 rounded-full text-primary animate-pulse">
+                            <UploadCloud className="w-8 h-8" />
+                          </div>
+                          <span className="text-sm font-semibold text-foreground">Select ID Proof Photo</span>
+                          <div className="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-[320px] px-2">
+                            <label 
+                              htmlFor="idProofImage" 
+                              className="flex items-center justify-center rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-xs px-4 py-2.5 cursor-pointer transition-all border border-primary/20 flex-1 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              <UploadCloud className="w-4 h-4 mr-2 text-primary" />
+                              Upload File
+                            </label>
+                            <button 
+                              type="button" 
+                              onClick={() => setIdProofCameraOpen(true)}
+                              className="flex items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-semibold text-xs px-4 py-2.5 transition-all border border-emerald-200 dark:border-emerald-900/40 flex-1 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              <Camera className="w-4 h-4 mr-2" />
+                              Use Camera
+                            </button>
+                          </div>
+                          <span className="text-[11px] font-semibold text-rose-500 max-w-[220px] leading-tight">Only PNG, JPG or JPEG accepted (max 4MB)</span>
                         </>
                       )}
                     </div>
@@ -489,6 +577,20 @@ export default function SignupPage() {
           </form>
         </div>
       </div>
+
+      <CameraCapture
+        open={profileCameraOpen}
+        onClose={() => setProfileCameraOpen(false)}
+        onCapture={handleProfileCapture}
+        title="Capture Profile Photo"
+      />
+
+      <CameraCapture
+        open={idProofCameraOpen}
+        onClose={() => setIdProofCameraOpen(false)}
+        onCapture={handleIdProofCapture}
+        title="Capture ID Proof Photo"
+      />
     </div>
   )
 }

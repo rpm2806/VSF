@@ -4,17 +4,21 @@ import { db } from "@/lib/db"
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { aadhaarNumber, dob } = body
+    const { mobileNumber, dob } = body
 
-    if (!aadhaarNumber || !dob) {
+    if (!mobileNumber || !dob) {
       return new NextResponse("Missing required fields", { status: 400 })
     }
 
-    const student = await db.student.findUnique({
-      where: { aadhaarNumber }
+    const student = await db.student.findFirst({
+      where: { 
+        mobileNumber,
+        dob,
+        deletedAt: null
+      }
     })
 
-    if (!student || student.deletedAt || student.dob !== dob) {
+    if (!student) {
       return NextResponse.json({ status: "INVALID" })
     }
 

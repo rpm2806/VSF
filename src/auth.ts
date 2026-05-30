@@ -47,18 +47,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       id: "student-login",
       name: "Student Login",
       credentials: {
-        aadhaarNumber: { label: "Aadhaar Number", type: "text" },
+        mobileNumber: { label: "Mobile Number", type: "text" },
         dob: { label: "Date of Birth", type: "date" }
       },
       async authorize(credentials) {
-        if (!credentials?.aadhaarNumber || !credentials?.dob) return null
+        if (!credentials?.mobileNumber || !credentials?.dob) return null
 
-        const student = await db.student.findUnique({
-          where: { aadhaarNumber: credentials.aadhaarNumber as string }
+        const student = await db.student.findFirst({
+          where: { 
+            mobileNumber: credentials.mobileNumber as string,
+            dob: credentials.dob as string,
+            deletedAt: null
+          }
         })
 
-        // Verify that the student exists, is not deleted, DOB matches, and status is verified (ACTIVE or ALUMNI)
-        if (student && !student.deletedAt && student.dob === credentials.dob) {
+        // Verify that the student exists, is not deleted, and status is verified (ACTIVE or ALUMNI)
+        if (student) {
           if (student.status !== "ACTIVE" && student.status !== "ALUMNI") {
             return null
           }

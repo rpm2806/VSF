@@ -30,7 +30,7 @@ model Student {
   id            String    @id @default(cuid())
   federationId  String    @unique // VSF-YYYY-SCH-XXXX
   fullName      String
-  mobileNumber  String    @unique
+  mobileNumber  String
   email         String?
   fatherName    String?
   motherName    String?

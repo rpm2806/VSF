@@ -32,12 +32,6 @@ export async function POST(req: Request) {
     const workingAt = (formData.get("workingAt") as string || "").toUpperCase()
 
     // Check existing
-    if (mobileNumber) {
-      const existing = await db.student.findUnique({ where: { mobileNumber } })
-      if (existing) {
-        return NextResponse.json({ error: "Mobile number already registered." }, { status: 400 })
-      }
-    }
     if (aadhaarNumber) {
       const existing = await db.student.findUnique({ where: { aadhaarNumber } })
       if (existing) {

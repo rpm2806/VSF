@@ -24,7 +24,7 @@ async function main() {
   
   // Create a mock student for testing
   const student = await prisma.student.upsert({
-    where: { mobileNumber: "9876543210" },
+    where: { federationId: "VSF-2026-SCH-0001" },
     update: {},
     create: {
       federationId: "VSF-2026-SCH-0001",
