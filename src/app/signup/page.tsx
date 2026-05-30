@@ -291,12 +291,11 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="aadhaarNumber">Aadhaar Number *</Label>
+                  <Label className="text-foreground font-semibold mb-1.5 block" htmlFor="aadhaarNumber">Aadhaar Number</Label>
                   <Input 
                     id="aadhaarNumber"
-                    required 
                     pattern="[0-9]{12}"
-                    placeholder="12-digit Aadhaar"
+                    placeholder="12-digit Aadhaar (Optional)"
                     value={formData.aadhaarNumber}
                     onChange={e => setFormData({...formData, aadhaarNumber: e.target.value})}
                     className="bg-background border-input text-foreground focus-visible:ring-primary placeholder:text-muted-foreground font-medium"
