@@ -134,7 +134,7 @@ export default function Topbar({ user }: { user: any }) {
               </div>
               <div className="rounded-xl bg-primary/10 p-3 border border-primary/20 text-center">
                 <p className="text-[11px] font-bold text-primary">Vriksh Students Federation</p>
-                <p className="text-[9px] text-muted-foreground">Version 1.0.0</p>
+                <p className="text-[9px] text-muted-foreground">Version 1.10.1</p>
               </div>
             </div>
           </div>

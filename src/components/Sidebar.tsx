@@ -74,7 +74,7 @@ export default function Sidebar({ userRole, pendingQueries = 0 }: { userRole: st
         </div>
         <div className="rounded-xl bg-primary/10 p-4 border border-primary/20 text-center">
           <p className="text-xs font-semibold text-primary mb-1">Vriksh Students Federation Portal</p>
-          <p className="text-[10px] text-muted-foreground">Version 1.0.0</p>
+          <p className="text-[10px] text-muted-foreground">Version 1.10.1</p>
         </div>
       </div>
     </aside>
