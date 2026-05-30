@@ -43,7 +43,14 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
 
   const filteredStudents = students.filter(student => {
     if (batchFilter !== "ALL" && student.batch !== batchFilter) return false
-    if (statusFilter !== "ALL" && student.status !== statusFilter) return false
+    
+    if (statusFilter !== "ALL") {
+      if (statusFilter === "ALUMNI") {
+        if (student.status !== "ALUMNI" && student.role !== "ALUMNI") return false
+      } else {
+        if (student.status !== statusFilter) return false
+      }
+    }
     
     if (!searchQuery) return true
     const q = searchQuery.toLowerCase()
