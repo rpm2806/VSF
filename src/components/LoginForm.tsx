@@ -21,7 +21,7 @@ export default function LoginForm() {
   const [activeTab, setActiveTab] = useState<"student" | "admin">("student")
 
   // Student Form State
-  const [mobileNumber, setMobileNumber] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [dob, setDob] = useState("")
 
   // Admin Form State
@@ -37,13 +37,13 @@ export default function LoginForm() {
       const statusRes = await fetch("/api/auth/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobileNumber, dob })
+        body: JSON.stringify({ identifier, dob })
       })
 
       if (statusRes.ok) {
         const data = await statusRes.json()
         if (data.status === "INVALID") {
-          toast.error("Invalid Mobile Number or Date of Birth")
+          toast.error("Invalid Mobile/Aadhaar or Date of Birth")
           setLoading(false)
           return
         }
@@ -60,13 +60,13 @@ export default function LoginForm() {
       }
 
       const res = await signIn("student-login", {
-        mobileNumber,
+        identifier,
         dob,
         redirect: false,
       })
 
       if (res?.error) {
-        toast.error("Invalid Mobile Number or Date of Birth")
+        toast.error("Invalid Mobile/Aadhaar or Date of Birth")
       } else {
         toast.success("Login successful")
         router.push("/dashboard")
@@ -197,7 +197,7 @@ export default function LoginForm() {
                 </h1>
                 <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
                   {activeTab === "student" 
-                    ? "Enter your Mobile Number and Date of Birth to login" 
+                    ? "Enter your Mobile or Aadhaar Number and Date of Birth to login" 
                     : "Enter your registered email and password to securely access the system"}
                 </p>
               </div>
@@ -205,15 +205,15 @@ export default function LoginForm() {
               {activeTab === "student" ? (
                 <form onSubmit={handleStudentLogin} className="space-y-5 w-full max-w-sm mx-auto">
                   <div className="space-y-1.5">
-                    <Label htmlFor="mobileNumber" className="text-foreground/95 font-semibold text-sm">Mobile Number</Label>
+                    <Label htmlFor="identifier" className="text-foreground/95 font-semibold text-sm">Mobile / Aadhaar Number</Label>
                     <div className="relative">
                       <User className="w-5 h-5 text-primary absolute left-3 top-1/2 -translate-y-1/2 z-10" />
                       <Input 
-                        id="mobileNumber" 
+                        id="identifier" 
                         type="text" 
-                        placeholder="Enter 10-digit mobile number" 
-                        value={mobileNumber}
-                        onChange={(e) => setMobileNumber(e.target.value)}
+                        placeholder="Enter Mobile or Aadhaar Number" 
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
                         className="pl-10 h-12 bg-background border-input focus-visible:ring-primary text-foreground font-medium"
                         required
                       />

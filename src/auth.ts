@@ -47,17 +47,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       id: "student-login",
       name: "Student Login",
       credentials: {
-        mobileNumber: { label: "Mobile Number", type: "text" },
+        identifier: { label: "Mobile or Aadhaar Number", type: "text" },
         dob: { label: "Date of Birth", type: "date" }
       },
       async authorize(credentials) {
-        if (!credentials?.mobileNumber || !credentials?.dob) return null
+        if (!credentials?.identifier || !credentials?.dob) return null
 
         const student = await db.student.findFirst({
           where: { 
-            mobileNumber: credentials.mobileNumber as string,
             dob: credentials.dob as string,
-            deletedAt: null
+            deletedAt: null,
+            OR: [
+              { mobileNumber: credentials.identifier as string },
+              { aadhaarNumber: credentials.identifier as string }
+            ]
           }
         })
 
