@@ -13,13 +13,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { ArrowUpDown, Search, Download } from "lucide-react"
+import { ArrowUpDown, Search, Download, FileSpreadsheet, FileText, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RenameBatchDialog } from "@/components/RenameBatchDialog"
 import { Check, X, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function StudentTableClient({ students, currentUserRole }: { students: any[], currentUserRole?: string }) {
@@ -107,143 +113,217 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
     }
   }
 
-  const exportToExcel = () => {
-    if (sortedStudents.length === 0) return
+  const getExportHeaders = () => [
+    "S.No.",
+    "Federation ID",
+    "Full Name",
+    "Mobile Number",
+    "Email",
+    "Role",
+    "Status",
+    "Class/Graduated in 20XX",
+    "Batch",
+    "Joining Year",
+    "DOB",
+    "Blood Group",
+    "Father's Name",
+    "Mother's Name",
+    "Parent's Contact",
+    "Aadhaar Number",
+    "Last School/College",
+    "Specialization",
+    "Permanent Address",
+    "Current Address",
+    "Working At",
+    "Bio",
+    "Pending Dues (₹)",
+    "Advance Balance (₹)",
+    "Donation Start Date",
+    "Created At"
+  ]
 
-    const escapeXml = (unsafe: string): string => {
-      if (typeof unsafe !== 'string') return String(unsafe);
-      return unsafe.replace(/[<>&'"]/g, (c) => {
-        switch (c) {
-          case '<': return '&lt;';
-          case '>': return '&gt;';
-          case '&': return '&amp;';
-          case '\'': return '&apos;';
-          case '"': return '&quot;';
-          default: return c;
-        }
-      });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getExportRows = (data: any[]) => data.map((s, index) => [
+    (index + 1).toString(),
+    s.federationId || "",
+    s.fullName || "",
+    s.mobileNumber || "",
+    s.email || "",
+    s.role || "",
+    s.status || "",
+    s.class || "",
+    s.batch || "",
+    s.joiningYear?.toString() || "",
+    s.dob || "",
+    s.bloodGroup || "",
+    s.fatherName || "",
+    s.motherName || "",
+    s.parentContact || "",
+    s.aadhaarNumber || "",
+    s.lastSchool || "",
+    s.specialization || "",
+    s.permanentAddress || "",
+    s.currentAddress || "",
+    s.workingAt || "",
+    s.bio || "",
+    s.pendingDues?.toString() || "0",
+    s.advanceBalance?.toString() || "0",
+    s.donationStartDate ? new Date(s.donationStartDate).toISOString().split('T')[0] : "",
+    s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : "",
+  ])
+
+  const exportToExcel = async () => {
+    if (sortedStudents.length === 0) {
+      toast.error("No data to export.")
+      return
     }
 
-    const headers = [
-      "Federation ID",
-      "Full Name",
-      "Mobile Number",
-      "Email",
-      "Role",
-      "Status",
-      "Class/Graduated in 20XX",
-      "Batch",
-      "Joining Year",
-      "DOB",
-      "Blood Group",
-      "Father's Name",
-      "Mother's Name",
-      "Parent's Contact",
-      "Aadhaar Number",
-      "Last School/College",
-      "Specialization",
-      "Permanent Address",
-      "Current Address",
-      "Working At",
-      "Bio",
-      "Pending Dues",
-      "Advance Balance",
-      "Donation Start Date",
-      "Created At",
-      "Profile Photo URL",
-      "ID Proof URL"
-    ]
+    try {
+      toast.loading("Generating Excel file...", { id: "export" })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const XLSX = await import("xlsx") as any
 
-    let xml = `<?xml version="1.0" encoding="utf-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:html="http://www.w3.org/TR/REC-html40">
- <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
-  <Author>Vriksh Students Federation</Author>
-  <Created>${new Date().toISOString()}</Created>
- </DocumentProperties>
- <Styles>
-  <Style ss:ID="Header">
-   <Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/>
-   <Interior ss:Color="#047857" ss:Pattern="Solid"/>
-   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
-  </Style>
-  <Style ss:ID="Default">
-   <Alignment ss:Vertical="Center"/>
-  </Style>
- </Styles>
- <Worksheet ss:Name="Students List">
-  <Table>
-`
+      const headers = getExportHeaders()
+      const rows = getExportRows(sortedStudents)
 
-    // Add headers row
-    xml += '   <Row ss:Height="24">\n'
-    headers.forEach(h => {
-      xml += `    <Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXml(h)}</Data></Cell>\n`
-    })
-    xml += '   </Row>\n'
+      const wsData = [headers, ...rows]
+      const ws = XLSX.utils.aoa_to_sheet(wsData)
 
-    // Add data rows
-    for (const s of sortedStudents) {
-      xml += '   <Row ss:Height="18">\n'
-      
-      const profileUrl = s.profileImage ? `${window.location.origin}/api/secure-image?url=${encodeURIComponent(s.profileImage)}` : "";
-      const idProofUrl = s.idProofImage ? `${window.location.origin}/api/secure-image?url=${encodeURIComponent(s.idProofImage)}` : "";
+      // Auto-fit column widths
+      const colWidths = headers.map((h, i) => {
+        const maxLen = Math.max(h.length, ...rows.map(r => (r[i] || "").length))
+        return { wch: Math.min(Math.max(maxLen + 2, 10), 40) }
+      })
+      ws["!cols"] = colWidths
 
-      const rowValues = [
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, "Students List")
+
+      // Set workbook properties
+      wb.Props = {
+        Title: "Vriksh Students Federation - Student Data",
+        Author: "VSF Admin",
+        CreatedDate: new Date(),
+      }
+
+      XLSX.writeFile(wb, `VSF_Students_${new Date().toISOString().split('T')[0]}.xlsx`)
+      toast.success("Excel file downloaded!", { id: "export" })
+    } catch (err) {
+      console.error("Excel export failed:", err)
+      toast.error("Failed to generate Excel file.", { id: "export" })
+    }
+  }
+
+  const exportToPdf = async () => {
+    if (sortedStudents.length === 0) {
+      toast.error("No data to export.")
+      return
+    }
+
+    try {
+      toast.loading("Generating PDF...", { id: "export" })
+      const { default: jsPDF } = await import("jspdf")
+      const autoTable = (await import("jspdf-autotable")).default
+
+      // Use landscape A3 for more columns
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a3" })
+
+      // Title header
+      doc.setFontSize(18)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(4, 120, 87) // Emerald
+      doc.text("Vriksh Students Federation", 14, 18)
+
+      doc.setFontSize(11)
+      doc.setFont("helvetica", "normal")
+      doc.setTextColor(100, 100, 100)
+      const filterInfo = [
+        batchFilter !== "ALL" ? `Batch: ${batchFilter}` : null,
+        statusFilter !== "ALL" ? `Status: ${statusFilter}` : null,
+        searchQuery ? `Search: "${searchQuery}"` : null,
+      ].filter(Boolean).join(" | ")
+      doc.text(
+        `Student Data Export — ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}${filterInfo ? ` — ${filterInfo}` : ""}`,
+        14, 25
+      )
+      doc.text(`Total Records: ${sortedStudents.length}`, 14, 31)
+
+      // Use a subset of columns for PDF (too many columns won't fit)
+      const pdfHeaders = [
+        "S.No.", "Federation ID", "Full Name", "Mobile", "Batch", "Class",
+        "Joining", "DOB", "Blood", "Status", "Pending Dues (₹)", "Adv. Bal (₹)",
+        "Father's Name", "Mother's Name", "Aadhaar"
+      ]
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfRows = sortedStudents.map((s: any, i: number) => [
+        (i + 1).toString(),
         s.federationId || "",
         s.fullName || "",
         s.mobileNumber || "",
-        s.email || "",
-        s.role || "",
-        s.status || "",
-        s.class || "",
-        s.batch || "",
+        s.batch || "—",
+        s.class || "—",
         s.joiningYear?.toString() || "",
-        s.dob || "",
-        s.bloodGroup || "",
-        s.fatherName || "",
-        s.motherName || "",
-        s.parentContact || "",
-        s.aadhaarNumber || "",
-        s.lastSchool || "",
-        s.specialization || "",
-        s.permanentAddress || "",
-        s.currentAddress || "",
-        s.workingAt || "",
-        s.bio || "",
+        s.dob || "—",
+        s.bloodGroup || "—",
+        s.status || "",
         s.pendingDues?.toString() || "0",
         s.advanceBalance?.toString() || "0",
-        s.donationStartDate ? new Date(s.donationStartDate).toISOString().split('T')[0] : "",
-        s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : "",
-        profileUrl,
-        idProofUrl
-      ]
+        s.fatherName || "—",
+        s.motherName || "—",
+        s.aadhaarNumber || "—",
+      ])
 
-      rowValues.forEach(val => {
-        const isNum = !isNaN(Number(val)) && val.trim() !== "";
-        const type = isNum ? "Number" : "String";
-        xml += `    <Cell><Data ss:Type="${type}">${escapeXml(val)}</Data></Cell>\n`
+      autoTable(doc, {
+        head: [pdfHeaders],
+        body: pdfRows,
+        startY: 36,
+        theme: "grid",
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          overflow: "linebreak",
+          valign: "middle",
+        },
+        headStyles: {
+          fillColor: [4, 120, 87],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 7.5,
+          halign: "center",
+        },
+        alternateRowStyles: {
+          fillColor: [245, 247, 250],
+        },
+        columnStyles: {
+          0: { halign: "center", cellWidth: 10 },
+          1: { cellWidth: 28 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 22 },
+          10: { halign: "right" },
+          11: { halign: "right" },
+        },
+        didDrawPage: (data: { pageNumber: number }) => {
+          // Footer on every page
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pageCount = (doc.internal as any).getNumberOfPages()
+          doc.setFontSize(8)
+          doc.setTextColor(150, 150, 150)
+          doc.text(
+            `Page ${data.pageNumber} of ${pageCount} — Generated by VSF v1.10.1`,
+            doc.internal.pageSize.getWidth() / 2,
+            doc.internal.pageSize.getHeight() - 8,
+            { align: "center" }
+          )
+        },
       })
-      xml += '   </Row>\n'
+
+      doc.save(`VSF_Students_${new Date().toISOString().split('T')[0]}.pdf`)
+      toast.success("PDF downloaded!", { id: "export" })
+    } catch (err) {
+      console.error("PDF export failed:", err)
+      toast.error("Failed to generate PDF.", { id: "export" })
     }
-
-    xml += `  </Table>
- </Worksheet>
-</Workbook>`
-
-    const blob = new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute("download", `students_export_${new Date().toISOString().split('T')[0]}.xls`)
-    link.style.visibility = "hidden"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
   }
 
   return (
@@ -289,10 +369,25 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
             <RenameBatchDialog oldName={batchFilter} />
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={exportToExcel} className="gap-2">
-          <Download className="w-4 h-4" />
-          Export Excel
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Download className="w-4 h-4" />
+              Export
+              <ChevronDown className="w-3 h-3 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={exportToExcel} className="gap-2 cursor-pointer">
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              Export as Excel (.xlsx)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={exportToPdf} className="gap-2 cursor-pointer">
+              <FileText className="w-4 h-4 text-red-600" />
+              Export as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <div className="rounded-md border bg-card">

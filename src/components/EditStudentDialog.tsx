@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Edit } from "lucide-react"
+import { Edit, Camera, Upload, X, ImageIcon } from "lucide-react"
 
 import {
   Dialog,
@@ -17,12 +17,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CameraCapture } from "@/components/CameraCapture"
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function EditStudentDialog({ student, existingBatches = [] }: { student: any; existingBatches?: string[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isCustomBatch, setIsCustomBatch] = useState(false)
+  const [imageUploading, setImageUploading] = useState(false)
+
+  // Image state
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null)
+  const [idProofImageFile, setIdProofImageFile] = useState<File | null>(null)
+  const [idProofImagePreview, setIdProofImagePreview] = useState<string | null>(null)
+  const [cameraTarget, setCameraTarget] = useState<"profile" | "idProof" | null>(null)
+
+  const profileInputRef = useRef<HTMLInputElement>(null)
+  const idProofInputRef = useRef<HTMLInputElement>(null)
   
   const allBatches = Array.from(new Set([...existingBatches, student.batch].filter(Boolean))).sort() as string[]
   
@@ -57,6 +70,73 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
     role: student.role || "STUDENT"
   })
 
+  const handleFileSelect = (file: File, target: "profile" | "idProof") => {
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("File size must be under 4MB.")
+      return
+    }
+    const previewUrl = URL.createObjectURL(file)
+    if (target === "profile") {
+      setProfileImageFile(file)
+      setProfileImagePreview(previewUrl)
+    } else {
+      setIdProofImageFile(file)
+      setIdProofImagePreview(previewUrl)
+    }
+  }
+
+  const handleCameraCapture = (file: File) => {
+    if (cameraTarget) {
+      handleFileSelect(file, cameraTarget)
+    }
+    setCameraTarget(null)
+  }
+
+  const clearImage = (target: "profile" | "idProof") => {
+    if (target === "profile") {
+      setProfileImageFile(null)
+      setProfileImagePreview(null)
+      if (profileInputRef.current) profileInputRef.current.value = ""
+    } else {
+      setIdProofImageFile(null)
+      setIdProofImagePreview(null)
+      if (idProofInputRef.current) idProofInputRef.current.value = ""
+    }
+  }
+
+  // Upload images separately via the upload endpoint
+  const uploadImages = async () => {
+    if (!profileImageFile && !idProofImageFile) return true
+
+    setImageUploading(true)
+    try {
+      const uploadData = new FormData()
+      if (profileImageFile) {
+        uploadData.append("profileImage", profileImageFile)
+      }
+      if (idProofImageFile) {
+        uploadData.append("idProofImage", idProofImageFile)
+      }
+
+      const res = await fetch(`/api/students/${student.id}/upload`, {
+        method: "POST",
+        body: uploadData
+      })
+
+      if (!res.ok) {
+        const err = await res.text()
+        throw new Error(err || "Failed to upload images")
+      }
+      return true
+    } catch (err) {
+      console.error("Image upload failed:", err)
+      toast.error("Failed to upload images. Other changes were saved.")
+      return false
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -69,6 +149,7 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
 
     try {
       // Convert all text values to uppercase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const uppercaseData: any = { ...formData }
       Object.keys(uppercaseData).forEach(key => {
         const val = uppercaseData[key]
@@ -84,6 +165,9 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
       })
 
       if (!response.ok) throw new Error("Failed to update student")
+
+      // Upload images if any were selected
+      await uploadImages()
       
       toast.success("Student updated successfully!")
       setOpen(false)
@@ -93,6 +177,12 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
     } finally {
       setLoading(false)
     }
+  }
+
+  // Generate secure image URL for existing Cloudinary images
+  const getSecureImageUrl = (url: string | null) => {
+    if (!url) return null
+    return `/api/secure-image?url=${encodeURIComponent(url)}`
   }
 
   return (
@@ -108,6 +198,181 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4 pt-4">
+          {/* Photo & ID Proof Upload Section */}
+          <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" /> Photo & ID Proof
+            </Label>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Profile Photo */}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Profile Photo</Label>
+                {profileImagePreview ? (
+                  <div className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={profileImagePreview}
+                      alt="New profile photo"
+                      className="w-full h-28 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => clearImage("profile")}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <span className="absolute bottom-1 left-1 bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded">New</span>
+                  </div>
+                ) : student.profileImage ? (
+                  <div className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={getSecureImageUrl(student.profileImage) || ""}
+                      alt="Current profile"
+                      className="w-full h-28 object-cover rounded-lg border"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-7 text-[10px] gap-1"
+                        onClick={() => profileInputRef.current?.click()}
+                      >
+                        <Upload className="h-3 w-3" /> Replace
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-7 text-[10px] gap-1"
+                        onClick={() => setCameraTarget("profile")}
+                      >
+                        <Camera className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <span className="absolute bottom-1 left-1 bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded">Current</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs h-9"
+                      onClick={() => profileInputRef.current?.click()}
+                    >
+                      <Upload className="h-3.5 w-3.5" /> Upload
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs h-9"
+                      onClick={() => setCameraTarget("profile")}
+                    >
+                      <Camera className="h-3.5 w-3.5" /> Camera
+                    </Button>
+                  </div>
+                )}
+                <input
+                  ref={profileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleFileSelect(file, "profile")
+                  }}
+                />
+              </div>
+              {/* ID Proof */}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">ID Proof</Label>
+                {idProofImagePreview ? (
+                  <div className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={idProofImagePreview}
+                      alt="New ID proof"
+                      className="w-full h-28 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => clearImage("idProof")}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <span className="absolute bottom-1 left-1 bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded">New</span>
+                  </div>
+                ) : student.idProofImage ? (
+                  <div className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={getSecureImageUrl(student.idProofImage) || ""}
+                      alt="Current ID proof"
+                      className="w-full h-28 object-cover rounded-lg border"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-7 text-[10px] gap-1"
+                        onClick={() => idProofInputRef.current?.click()}
+                      >
+                        <Upload className="h-3 w-3" /> Replace
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-7 text-[10px] gap-1"
+                        onClick={() => setCameraTarget("idProof")}
+                      >
+                        <Camera className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <span className="absolute bottom-1 left-1 bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded">Current</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs h-9"
+                      onClick={() => idProofInputRef.current?.click()}
+                    >
+                      <Upload className="h-3.5 w-3.5" /> Upload
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs h-9"
+                      onClick={() => setCameraTarget("idProof")}
+                    >
+                      <Camera className="h-3.5 w-3.5" /> Camera
+                    </Button>
+                  </div>
+                )}
+                <input
+                  ref={idProofInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleFileSelect(file, "idProof")
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
@@ -362,12 +627,20 @@ export function EditStudentDialog({ student, existingBatches = [] }: { student: 
 
           <div className="pt-4 space-x-2 flex justify-end">
             <Button variant="outline" type="button" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={loading} className="bg-amber-600 hover:bg-amber-700 text-white">
-              {loading ? "Saving..." : "Save Changes"}
+            <Button type="submit" disabled={loading || imageUploading} className="bg-amber-600 hover:bg-amber-700 text-white">
+              {loading || imageUploading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>
       </DialogContent>
+
+      {/* Camera Capture Modal */}
+      <CameraCapture
+        open={cameraTarget !== null}
+        onClose={() => setCameraTarget(null)}
+        onCapture={handleCameraCapture}
+        title={cameraTarget === "profile" ? "Capture Profile Photo" : "Capture ID Proof"}
+      />
     </Dialog>
   )
 }
