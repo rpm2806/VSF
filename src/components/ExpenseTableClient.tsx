@@ -66,13 +66,13 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
             <TableHead>Amount</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Status</TableHead>
-            {role === "MASTER_ADMIN" && <TableHead>Actions</TableHead>}
+            {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && <TableHead>Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {expenses.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={role === "MASTER_ADMIN" ? 6 : 5} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                 No expenses recorded yet.
               </TableCell>
             </TableRow>
@@ -98,7 +98,7 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
                     {expense.status}
                   </Badge>
                 </TableCell>
-                {role === "MASTER_ADMIN" && (
+                {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && (
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {expense.status === "PENDING" && (
@@ -123,17 +123,19 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
                           </Button>
                         </>
                       )}
-                      {/* Delete always visible for master admin */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
-                        disabled={loadingId === expense.id}
-                        onClick={() => handleDelete(expense.id, expense.title)}
-                        title="Delete expense"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {/* Delete only for master admin */}
+                      {role === "MASTER_ADMIN" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                          disabled={loadingId === expense.id}
+                          onClick={() => handleDelete(expense.id, expense.title)}
+                          title="Delete expense"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 )}

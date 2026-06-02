@@ -13,7 +13,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userRole = (session.user as any).role
     
-    if (userRole !== "MASTER_ADMIN") {
+    if (userRole !== "MASTER_ADMIN" && userRole !== "VOLUNTEER") {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
