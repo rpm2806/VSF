@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Check, X, Trash2 } from "lucide-react"
+import { Check, X, Trash2, Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import {
@@ -66,13 +66,14 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
             <TableHead>Amount</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Bill</TableHead>
             {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && <TableHead>Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {expenses.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                 No expenses recorded yet.
               </TableCell>
             </TableRow>
@@ -97,6 +98,22 @@ export function ExpenseTableClient({ expenses, role }: { expenses: any[], role: 
                   >
                     {expense.status}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {expense.billImage ? (
+                    <a
+                      href={`/api/secure-image?url=${encodeURIComponent(expense.billImage)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="View Bill"
+                    >
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && (
                   <TableCell>
