@@ -31,7 +31,20 @@ export async function POST(req: Request) {
     const bio = (formData.get("bio") as string || "").toUpperCase()
     const workingAt = (formData.get("workingAt") as string || "").toUpperCase()
 
-    // Check existing
+    // Check duplicate: Mobile + DOB combination
+    if (mobileNumber && dob) {
+      const duplicate = await db.student.findFirst({
+        where: { mobileNumber, dob }
+      })
+      if (duplicate) {
+        return NextResponse.json(
+          { error: "A student with this mobile number and date of birth is already registered. Please contact the admin if you think this is a mistake." },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Check duplicate: Aadhaar number (if provided)
     if (aadhaarNumber) {
       const existing = await db.student.findUnique({ where: { aadhaarNumber } })
       if (existing) {
