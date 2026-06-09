@@ -241,7 +241,7 @@ export default async function DashboardPage() {
 
       {(role === "MASTER_ADMIN" || role === "VOLUNTEER") && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 shadow-sm border-border/50">
+          <Card className="col-span-full lg:col-span-4 shadow-sm border-border/50">
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>

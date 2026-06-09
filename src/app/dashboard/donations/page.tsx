@@ -86,7 +86,7 @@ export default async function DonationsPage() {
         <VerificationQueue donations={pendingDonations} isMasterAdmin={isMasterAdmin} />
       )}
 
-      <div className="rounded-md border bg-card">
+      <div className="rounded-md border bg-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

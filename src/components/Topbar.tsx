@@ -18,7 +18,8 @@ import {
   Bell, 
   GraduationCap,
   Shield,
-  MessageCircle
+  MessageCircle,
+  Trash2
 } from "lucide-react"
 
 import { Button } from "./ui/button"
@@ -36,10 +37,11 @@ export default function Topbar({ user }: { user: any }) {
     { name: "Batches", href: "/dashboard/batches", icon: Users, roles: ["MASTER_ADMIN", "VOLUNTEER"] },
     { name: "Volunteers", href: "/dashboard/volunteers", icon: Shield, roles: ["MASTER_ADMIN"] },
     { name: "Donations", href: "/dashboard/donations", icon: HeartHandshake, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI", "OTHER"] },
-    { name: "Expenses", href: "/dashboard/expenses", icon: Receipt, roles: ["MASTER_ADMIN"] },
+    { name: "Expenses", href: "/dashboard/expenses", icon: Receipt, roles: ["MASTER_ADMIN", "VOLUNTEER"] },
     { name: "Announcements", href: "/dashboard/announcements", icon: Bell, roles: ["MASTER_ADMIN", "VOLUNTEER", "STUDENT", "ALUMNI", "OTHER"] },
     { name: "Queries", href: "/dashboard/queries", icon: MessageCircle, roles: ["MASTER_ADMIN"] },
     { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["MASTER_ADMIN", "STUDENT", "ALUMNI", "OTHER"] },
+    { name: "Recycle Bin", href: "/dashboard/recycle-bin", icon: Trash2, roles: ["MASTER_ADMIN"] },
   ].filter(item => item.roles.includes(userRole))
 
   return (

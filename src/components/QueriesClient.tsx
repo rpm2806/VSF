@@ -93,7 +93,7 @@ export function QueriesClient({ requests }: { requests: any[] }) {
   return (
     <>
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Total Queries", value: requests.length, color: "text-foreground" },
           { label: "Pending", value: pendingCount, color: "text-amber-600" },
@@ -134,7 +134,7 @@ export function QueriesClient({ requests }: { requests: any[] }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

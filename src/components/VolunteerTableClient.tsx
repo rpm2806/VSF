@@ -154,7 +154,7 @@ export function VolunteerTableClient({ volunteers }: { volunteers: any[] }) {
         />
       </div>
 
-      <div className="rounded-md border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-md border bg-card shadow-sm overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

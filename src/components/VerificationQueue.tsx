@@ -148,7 +148,7 @@ export default function VerificationQueue({ donations, isMasterAdmin = false }: 
           <Badge variant="destructive" className="rounded-full">{donations.length}</Badge>
         </h2>
       </div>
-      <div className="rounded-md border bg-orange-50/30">
+      <div className="rounded-md border bg-orange-50/30 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

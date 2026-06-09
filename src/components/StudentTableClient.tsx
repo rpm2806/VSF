@@ -328,9 +328,9 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center w-full max-w-sm space-x-2">
-          <div className="relative w-full">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+        <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full">
+          <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -340,57 +340,61 @@ export function StudentTableClient({ students, currentUserRole }: { students: an
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          {uniqueBatches.length > 0 && (
-            <Select value={batchFilter} onValueChange={(v) => setBatchFilter(v || "ALL")}>
-              <SelectTrigger className="w-[160px] bg-background">
-                <SelectValue placeholder="All Batches" />
+          <div className="flex flex-wrap items-center gap-2">
+            {uniqueBatches.length > 0 && (
+              <Select value={batchFilter} onValueChange={(v) => setBatchFilter(v || "ALL")}>
+                <SelectTrigger className="w-[140px] sm:w-[160px] bg-background">
+                  <SelectValue placeholder="All Batches" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Batches</SelectItem>
+                  {uniqueBatches.map(b => (
+                    <SelectItem key={b as string} value={b as string}>{b as string}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
+              <SelectTrigger className="w-[140px] sm:w-[160px] bg-background">
+                <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All Batches</SelectItem>
-                {uniqueBatches.map(b => (
-                  <SelectItem key={b as string} value={b as string}>{b as string}</SelectItem>
-                ))}
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
+                <SelectItem value="INACTIVE">Inactive</SelectItem>
+                <SelectItem value="ALUMNI">Alumni</SelectItem>
               </SelectContent>
             </Select>
-          )}
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v || "ALL")}>
-            <SelectTrigger className="w-[160px] bg-background">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Statuses</SelectItem>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-              <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
-              <SelectItem value="INACTIVE">Inactive</SelectItem>
-              <SelectItem value="ALUMNI">Alumni</SelectItem>
-            </SelectContent>
-          </Select>
-          {batchFilter !== "ALL" && (
-            <RenameBatchDialog oldName={batchFilter} />
-          )}
+            {batchFilter !== "ALL" && (
+              <RenameBatchDialog oldName={batchFilter} />
+            )}
+          </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Download className="w-4 h-4" />
-              Export
-              <ChevronDown className="w-3 h-3 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={exportToExcel} className="gap-2 cursor-pointer">
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Export as Excel (.xlsx)
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={exportToPdf} className="gap-2 cursor-pointer">
-              <FileText className="w-4 h-4 text-red-600" />
-              Export as PDF
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2 justify-end sm:justify-start">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
+                <Download className="w-4 h-4" />
+                Export
+                <ChevronDown className="w-3 h-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportToExcel} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                Export as Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToPdf} className="gap-2 cursor-pointer">
+                <FileText className="w-4 h-4 text-red-600" />
+                Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       
-      <div className="rounded-md border bg-card">
+      <div className="rounded-md border bg-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
